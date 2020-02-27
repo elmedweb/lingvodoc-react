@@ -11,8 +11,8 @@ import { compose } from 'recompose';
 
 
 const news = gql`
-        query news($is_visible:Boolean,$locale:String){
-            news(is_visible:$is_visible, locale: $locale){
+        query news{
+            news(is_visible:true, locale: "ru"){
             news_id
             author
             author_id

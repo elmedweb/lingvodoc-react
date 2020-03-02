@@ -27,14 +27,14 @@ const News = (props) => {
             <h1> {getTranslation('News')}</h1>
             <main>
                 <ul>
-                    {data.loading ? null : data.news.slice(0, 3).map(news_item => (
+                    {data.loading ? null : data.news ? data.news.slice(0, 3).map(news_item => (
                         <li key={news_item.news_id}>
                             <Link to={{ pathname: `/news/${news_item.news_id}`, props: news_item }}>{news_item.title}</Link>
                             {/*            <div className="date_published">{Date.stringify(news_item.date_published)}</div> */}
                             <div className="date_published">{news_item.date_published}</div>
                             <div className='description'> {news_item.description}</div>
                         </li>
-                    ))}
+                    )):null}
                 </ul>
                 <Link to="/news_list">{getTranslation('All news')}</Link>
             </main>

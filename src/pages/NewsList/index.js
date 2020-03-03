@@ -58,6 +58,12 @@ class NewsItem extends React.Component {
         )
     }
     render() {
+        let faithfulTime = (time) => {
+            if (time <= 9) {
+                return 0+time
+            }
+            
+        }
         return (
             <div className='news_list'>{this.state.newsArr.map(news_item => (
                 <li key={news_item.news_id}>
@@ -67,7 +73,7 @@ class NewsItem extends React.Component {
                             <div className="description">{news_item.description}</div>
                             <div className="date_published">
                                 <h3>{getTranslation('Date published')}</h3>
-                                {news_item.date_published}
+                                {faithfulTime(String(new Date(Number(news_item.date_published)).getDate()))}.{faithfulTime(String(new Date(Number(news_item.date_published)).getMonth()))}.{String(new Date(Number(news_item.date_published)).getFullYear())}
 
                             </div>
                             <div className="author">

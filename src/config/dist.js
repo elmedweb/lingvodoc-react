@@ -1,8 +1,7 @@
 import base from './base';
 
 const dist = {
-
-    apiUrl: '',
+  apiUrl: '',
   env: 'dist',
   homePath: '/',
 };

@@ -106,8 +106,9 @@ class Entities extends React.Component {
   }
 
   create(content, self_id) {
+    console.log( 'content', content );
     const {
-      entry, column, createEntity,
+      entry, column, createEntity
     } = this.props;
 
     const variables = { parent_id: entry.id, field_id: column.id }
@@ -239,10 +240,9 @@ class Entities extends React.Component {
     });
   }
 
-
   render() {
     const {
-      perspectiveId, entry, column, columns, mode, entitiesMode, parentEntity,
+      perspectiveId, entry, column, columns, mode, entitiesMode, parentEntity
     } = this.props;
 
     const Component = getComponent(column.data_type);
@@ -258,27 +258,35 @@ class Entities extends React.Component {
 
     return (
       <ul>
-        {entities.map(entity => (
-          <Component
-            key={compositeIdToString(entity.id)}
-            perspectiveId={perspectiveId}
-            as="li"
-            column={column}
-            columns={columns}
-            entry={entry}
-            entity={entity}
-            mode={mode}
-            entitiesMode={entitiesMode}
-            parentEntity={parentEntity}
-            publish={this.publish}
-            remove={this.remove}
-            accept={this.accept}
-            update={this.update}
-            className={(mode != 'edit' && entities.indexOf(entity) == entities.length - 1) ? 'last' : ''}
-          />
-        ))}
+        {entities.map(entity => {
+          // console.log( entity.content );
+
+          if ( this.props.filter && entity.content.includes( this.props.filter ) ) {
+            // console.log( 'Content:', entity.content, 'Filter:', this.props.filter );
+          }
+
+          return (
+            <Component
+              key={compositeIdToString(entity.id)}
+              perspectiveId={perspectiveId}
+              as="li"
+              column={column}
+              columns={columns}
+              entry={entry}
+              entity={entity}
+              mode={mode}
+              entitiesMode={entitiesMode}
+              parentEntity={parentEntity}
+              publish={this.publish}
+              remove={this.remove}
+              accept={this.accept}
+              update={this.update}
+              className={(mode != 'edit' && entities.indexOf(entity) == entities.length - 1) ? `last ${ this.props.filter && entity.content.includes( this.props.filter ) ? 'finded-by-filter' : '' }` : ''}
+            />
+          )
+        })}
         {mode == 'edit' && (
-          <li className="last">
+          <li className={`last ${ this.props.filter ? 'finded-by-filter' : '' }`}>
             {!this.state.edit && (
               <Button.Group basic size="mini">
                 <Button icon="plus" onClick={() => this.setState({ edit: true })} />

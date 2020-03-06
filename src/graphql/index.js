@@ -23,8 +23,8 @@ const errorLink = onError(({ networkError = {}, graphQLErrors }) => {
 });
 
 const httpLink = createUploadLink({
-  uri: `${config.apiUrl.replace( 'api', 'api-mock' )}/graphql`,
-/* uri: `http://localhost:9000/graphql`, */
+  // uri: `${config.apiUrl.replace( 'api', 'api-mock' )}/graphql`,
+  uri: `${ config.apiUrl }/graphql`,
   credentials: 'same-origin',
 });
 

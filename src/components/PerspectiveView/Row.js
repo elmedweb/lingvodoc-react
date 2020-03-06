@@ -17,6 +17,7 @@ const Row = ({
   selectEntries,
   selectedEntries,
   onEntrySelect,
+  filter
 }) => (
   <Table.Row>
     {selectEntries && (
@@ -37,6 +38,7 @@ const Row = ({
         entry={entry}
         mode={mode}
         entitiesMode={entitiesMode}
+        filter={filter}
       />
     ))}
     {!isEmpty(actions) && (

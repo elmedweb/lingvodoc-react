@@ -2,47 +2,66 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { onlyUpdateForKeys } from 'recompose';
 import { Table } from 'semantic-ui-react';
-
 import Row from './Row';
 
-const TableBody = ({
-  perspectiveId, entitiesMode, entries, columns, mode, actions, selectEntries, selectedEntries, onEntrySelect,
-}) => (
-  <Table.Body>
-    {entries.map(entry => (
-      <Row
-        key={entry.id}
-        perspectiveId={perspectiveId}
-        entry={entry}
-        columns={columns}
-        mode={mode}
-        entitiesMode={entitiesMode}
-        actions={actions}
-        selectEntries={selectEntries}
-        selectedEntries={selectedEntries}
-        onEntrySelect={onEntrySelect}
-      />
-    ))}
-  </Table.Body>
-);
+class TableBody extends React.Component {
+  constructor ( props ) {
+    super( props );
+  }
+
+  render () {
+    const {
+      selectedEntries,
+      perspectiveId,
+      selectEntries,
+      onEntrySelect,
+      entitiesMode,
+      entries,
+      columns,
+      actions,
+      filter,
+      mode
+    } = this.props;
+
+    return(
+      <Table.Body>
+        {entries.map(entry => (
+          <Row
+            selectedEntries = { selectedEntries }
+            perspectiveId   = { perspectiveId }
+            onEntrySelect   = { onEntrySelect }
+            selectEntries   = { selectEntries }
+            entitiesMode    = { entitiesMode }
+            actions         = { actions }
+            columns         = { columns }
+            filter          = { filter }
+            entry           = { entry }
+            mode            = { mode }
+            key             = { entry.id }
+          />
+        ))}
+      </Table.Body>
+    )
+  }
+}
 
 TableBody.propTypes = {
-  perspectiveId: PropTypes.array.isRequired,
-  entries: PropTypes.array.isRequired,
-  columns: PropTypes.array.isRequired,
-  mode: PropTypes.string.isRequired,
-  entitiesMode: PropTypes.string.isRequired,
-  actions: PropTypes.array,
-  selectEntries: PropTypes.bool,
   selectedEntries: PropTypes.array,
-  onEntrySelect: PropTypes.func,
+  perspectiveId:   PropTypes.array.isRequired,
+  selectEntries:   PropTypes.bool,
+  onEntrySelect:   PropTypes.func,
+  entitiesMode:    PropTypes.string.isRequired,
+  entries:         PropTypes.array.isRequired,
+  columns:         PropTypes.array.isRequired,
+  actions:         PropTypes.array,
+  mode:            PropTypes.string.isRequired
 };
 
 TableBody.defaultProps = {
-  actions: [],
-  selectEntries: false,
   selectedEntries: [],
-  onEntrySelect: () => {},
+  onEntrySelect:   () => {},
+  selectEntries:   false,
+  actions:         []
 };
 
 export default onlyUpdateForKeys(['perspectiveId', 'entries', 'mode', 'selectedEntries'])(TableBody);

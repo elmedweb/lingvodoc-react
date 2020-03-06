@@ -128,7 +128,7 @@ const TableComponent = ({
   selectEntries,
   selectedEntries,
   onEntrySelect,
-  actions,
+  actions
 }) => (
   <div style={{ overflowY: 'auto' }}>
     <Table celled padded>
@@ -277,11 +277,10 @@ const P = ({
     // remove empty lexical entries, if not in edit mode
     es => (mode !== 'edit' ? es.filter(e => e.entities.length > 0) : es),
     // apply filtering
-    es =>
-      (!!filter && filter.length > 0
-        ? es.filter(entry =>
-          !!entry.entities.find(entity => typeof entity.content === 'string' && entity.content.indexOf(filter) >= 0))
-        : es),
+    es => (!!filter && filter.length > 0
+      ? es.filter(entry =>
+        !!entry.entities.find(entity => typeof entity.content === 'string' && entity.content.indexOf(filter) >= 0))
+      : es),
     // apply sorting
     (es) => {
       // no sorting required
@@ -297,6 +296,7 @@ const P = ({
         }
         return '';
       });
+
       return order === 'a' ? sortedEntries : reverse(sortedEntries);
     },
   ]);
@@ -379,6 +379,7 @@ const P = ({
           selectEntries={mode === 'edit'}
           selectedEntries={selectedEntries}
           onEntrySelect={onEntrySelect}
+          filter={filter}
         />
       </Table>
       <Pagination current={page} total={Math.floor(entries.length / ROWS_PER_PAGE) + 1} to={mode} />

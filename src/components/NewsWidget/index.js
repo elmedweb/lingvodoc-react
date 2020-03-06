@@ -27,7 +27,7 @@ const News = (props) => {
             <h1> {getTranslation('News')}</h1>
             <main>
                 <ul>
-                    {data.loading ? null : data.news.slice(0, 3).map(news_item => {
+                    {data.loading ? null : data.news ? data.news.slice(0, 3).map(news_item => {
                         let faithfulTime = (time) => {
                             if (time <= 9) {
                                 return 0+time
@@ -42,7 +42,7 @@ const News = (props) => {
                             </li>
                         )
                     }
-                    )}
+                    ) : null }
                 </ul>
                 <Link to="/news_list">{getTranslation('All news')}</Link>
             </main>

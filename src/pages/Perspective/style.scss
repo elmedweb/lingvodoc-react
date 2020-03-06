@@ -11,9 +11,36 @@
 
   .menu {
     margin-bottom: 0;
+
+    .regex-dropdown {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      background-color: rgba(255, 255, 255, 0);
+      color: #fff;
+
+      &.active {
+        border: none !important;
+        box-shadow: none !important;
+        background-color: #fff;
+
+        .icon {
+          color: #000;
+        }
+      }
+
+      .menu {
+        border: 1px solid rgba(34, 36, 38, 0.15) !important;
+        box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.08) !important;
+        background-color: #fff;
+      }
+    }
   }
 
   .content {
     margin-top: 0;
   }
+}
+
+.finded-by-filter {
+  background-color: yellow !important;
 }

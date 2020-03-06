@@ -6,7 +6,8 @@ import Entities from 'components/LexicalEntry';
 import 'styles/main.scss';
 
 const Cell = (props) => {
-  const { perspectiveId, entry, column, columns, mode, entitiesMode } = props;
+  const { perspectiveId, entry, column, columns, mode, entitiesMode, filter } = props;
+
   return (
     <Table.Cell className="entity gentium">
       <Entities
@@ -16,6 +17,7 @@ const Cell = (props) => {
         entry={entry}
         mode={mode}
         entitiesMode={entitiesMode}
+        filter={filter}
       />
     </Table.Cell>
   );

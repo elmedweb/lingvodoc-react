@@ -73,7 +73,9 @@ const handlers = compose(
   withState('value', 'updateValue', props => props.filter),
   withHandlers({
     onChange(props) {
-      return event => props.updateValue(event.target.value);
+      return event => {
+        return props.updateValue(event.target.value);
+      };
     },
     onSubmit(props) {
       return (event) => {
@@ -95,6 +97,23 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
   </div>
 ));
 
+const regexOptions = [
+  {
+    key: 'PCRE',
+    text: 'PCRE',
+    value: 'PCRE'
+  },
+  {
+    key: 'Starling Regex',
+    text: 'Starling Regex',
+    value: 'Starling Regex'
+  }
+];
+
+const handleRegexCahnge = (e, { name, value }) => {
+
+}
+
 const ModeSelector = onlyUpdateForKeys([
   'mode',
   'baseUrl',
@@ -112,36 +131,45 @@ const ModeSelector = onlyUpdateForKeys([
   openPhonologicalStatisticalDistanceModal,
   soundAndMarkup,
   id,
-}) => (
-  <Menu tabular>
-    {map(MODES, (info, stub) => (
-      <Menu.Item key={stub} as={Link} to={`${baseUrl}/${stub}`} active={mode === stub}>
-        {info.text}
-        {info.component === PerspectiveView ? (<Counter
-          id={id}
-          mode={info.entitiesMode}
-        />) : null}
-      </Menu.Item>
-    ))}
-    <Dropdown item text={getTranslation("Tools")}>
-      <Dropdown.Menu>
-        <Dropdown.Item onClick={openCognateAnalysisModal}>{getTranslation("Cognate analysis")}</Dropdown.Item>
-        <Dropdown.Item onClick={openCognateAcousticAnalysisModal}>{getTranslation("Cognate acoustic analysis")}</Dropdown.Item>
-        <Dropdown.Item onClick={openCognateMultiModal}>{getTranslation("Cognate multi-language reconstruction")}</Dropdown.Item>
-        <Dropdown.Item onClick={openCognateReconstructionModal}>{getTranslation("Cognate reconstruction")}</Dropdown.Item>
-        <Dropdown.Item onClick={openCognateSuggestionsModal}>{getTranslation("Cognate suggestions")}</Dropdown.Item>
-        <Dropdown.Item onClick={openPhonemicAnalysisModal}>{getTranslation("Phonemic analysis")}</Dropdown.Item>
-        <Dropdown.Item onClick={openPhonologyModal}>{getTranslation("Phonology")}</Dropdown.Item>
-        <Dropdown.Item onClick={openPhonologicalStatisticalDistanceModal}>{getTranslation("Phonological statistical distance")}</Dropdown.Item>
-        <Dropdown.Item onClick={soundAndMarkup}>{getTranslation("Sound and markup")}</Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
-
-    <Menu.Menu position="right">
-      <Filter filter={filter} submitFilter={submitFilter} />
-    </Menu.Menu>
-  </Menu>
-));
+}) => {
+  return (
+    <Menu tabular>
+      {map(MODES, (info, stub) => (
+        <Menu.Item key={stub} as={Link} to={`${baseUrl}/${stub}`} active={mode === stub}>
+          {info.text}
+          {info.component === PerspectiveView ? (<Counter
+            id={id}
+            mode={info.entitiesMode}
+          />) : null}
+        </Menu.Item>
+      ))}
+      <Dropdown item text={getTranslation("Tools")}>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={openCognateAnalysisModal}>{getTranslation("Cognate analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateAcousticAnalysisModal}>{getTranslation("Cognate acoustic analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateMultiModal}>{getTranslation("Cognate multi-language reconstruction")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateReconstructionModal}>{getTranslation("Cognate reconstruction")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateSuggestionsModal}>{getTranslation("Cognate suggestions")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonemicAnalysisModal}>{getTranslation("Phonemic analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologyModal}>{getTranslation("Phonology")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologicalStatisticalDistanceModal}>{getTranslation("Phonological statistical distance")}</Dropdown.Item>
+          <Dropdown.Item onClick={soundAndMarkup}>{getTranslation("Sound and markup")}</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+  
+      <Menu.Menu position="right">
+        <Dropdown
+          selection
+          className="regex-dropdown"
+          placeholder={getTranslation("RegEx")}
+          options={regexOptions}
+          onChange={handleRegexCahnge}
+        />
+        <Filter filter={filter} submitFilter={submitFilter} />
+      </Menu.Menu>
+    </Menu>
+  )
+});
 
 const soundAndMarkup = (perspectiveId, mode, launchSoundAndMarkup) => {
   launchSoundAndMarkup({
@@ -210,21 +238,21 @@ class Perspective extends React.Component {
         <Switch>
           <Redirect exact from={baseUrl} to={`${baseUrl}/view`} />
           {map(MODES, (info, stub) => (
-            <Route
-              key={stub}
-              path={`${baseUrl}/${stub}`}
-              render={() => (
-                <info.component
-                  id={id}
-                  mode={mode}
-                  entitiesMode={info.entitiesMode}
-                  page={page}
-                  filter={perspective.filter}
-                  className="content"
-                />
-              )}
-            />
-          ))}
+              <Route
+                key={stub}
+                path={`${baseUrl}/${stub}`}
+                render={() => (
+                  <info.component
+                    id={id}
+                    mode={mode}
+                    entitiesMode={info.entitiesMode}
+                    page={page}
+                    filter={perspective.filter}
+                    className="content"
+                  />
+                )}
+              />
+            ))}
           <Route component={NotFound} />
         </Switch>
       </Container>

@@ -8,6 +8,9 @@ export const TOGGLE_DICT = '@home/TOGGLE_DICT';
 export const RESET_DICTS = '@home/RESET_DICTS';
 export const TOGGLE_GRANTS_MODE = '@home/TOGGLE_GRANTS_MODE';
 export const SET_GRANTS_MODE = '@home/SET_GRANTS_MODE';
+export const SET_LANGUAGES_MODE = '@home/SET_GRANTS_MODE';
+export const SET_DICTIONARIES_MODE = '@home/SET_DICTIONARIES_MODE';
+
 
 export const toggleDictionary = id => ({
   type: TOGGLE_DICT,
@@ -22,6 +25,10 @@ export const toggleGrantsMode = () => ({
 
 export const setGrantsMode = mode => ({ type: SET_GRANTS_MODE, payload: mode });
 
+export const setLanguagesMode = mode => ({ type: SET_LANGUAGES_MODE, payload: mode });
+
+export const setDictionariesMode = mode => ({ type: SET_DICTIONARIES_MODE, payload: mode });
+
 function selected(state = new Immutable.Set(), { type, payload }) {
   const id = fromJS(payload);
   switch (type) {
@@ -34,25 +41,33 @@ function selected(state = new Immutable.Set(), { type, payload }) {
   }
 }
 
-function grantsMode(state = false, { type, payload }) {
-  switch (type) {
-    case TOGGLE_GRANTS_MODE:
-      return !state;
-    case SET_GRANTS_MODE:
-      return payload;
-    case LOCATION_CHANGE:
-      if (payload.pathname === config.homePath) {
-        const params = new URLSearchParams(payload.search);
-        const mode = params.get('mode');
-        return mode ? mode !== 'dicts' : state;
-      }
-      return state;
-    default:
-      return state;
-  }
+
+function selectMode(state = "languagesMode", { type, payload }) {
+    switch (type) {
+      case TOGGLE_GRANTS_MODE:
+        return !state;
+      case SET_LANGUAGES_MODE:
+        return payload;
+      case SET_GRANTS_MODE:
+        return payload;
+      case SET_DICTIONARIES_MODE:
+        return payload;
+      case LOCATION_CHANGE:
+        if (payload.pathname === config.homePath) {
+          const params = new URLSearchParams(payload.search);
+          const mode = params.get('mode');
+          return mode ? mode !== 'dicts' : state;
+        }
+        return state;
+      default:
+        return state;
+    }
+  
+
 }
+
 
 export default combineReducers({
   selected,
-  grantsMode,
+  selectMode
 });

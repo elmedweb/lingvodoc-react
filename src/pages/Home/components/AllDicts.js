@@ -7,13 +7,17 @@ import Tree from './Tree';
 import { Form, Radio, Dropdown, Input, Button } from 'semantic-ui-react';
 import gql from 'graphql-tag';
 import { graphql, withApollo } from 'react-apollo';
-
 import { compose } from 'recompose';
 
+let optionsAuthorsList = [];
 let authorsList = [];
-
-let date = null;
-let test89 = [];
+let last_modified_at_Dictionary_mody = null;
+let dicts = null;
+const metadataQuery = gql`
+  query metadata {
+    select_tags_metadata
+  }
+`;
 
 const AutorsName = gql`
 query AuthDictionaries($id:LingvodocID!) {
@@ -32,105 +36,84 @@ query AuthDictionaries($id:LingvodocID!) {
   }
 }
 `;
-const metadataQuery = gql`
-  query metadata {
-    select_tags_metadata
-  }
-`;
-const Last_modified_at = gql` 
-query author($perspectiveId:LingvodocID!) {
-  perspective(id:$perspectiveId){
-    id
-    last_modified_at
-  authors{
-    id
-    name
-    }
-  }
-}
-`;
-
-let last_modified_at_Dictionary_mody;
-const classNames = {
-  container: 'search-advanced-filter',
-  field: 'search-advanced-filter__field',
-  header: 'search-advanced-filter__header',
-  warning: 'search-advanced-filter__warning',
-  hide: 'hide',
-};
 
 class AllDicts extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
-      authors: [],
-      test5: [],
-      arrTest: [],
-      test7: ''
+      arrayDictionary: []
     }
-    this.flag = false;
-    this.fill = this.fill.bind(this)
+
+    this.equalValueFilter = this.equalValueFilter.bind(this)
     this.startDate = null;
     this.endDate = null;
+    this.selectedAuthor = [];
   }
   static isFieldLanguageVulnerability(name) {
     return name === 'languageVulnerability';
   }
 
-  test = (e, { value }) => {
-    this.setState({ test5: [] })
-    this.setState({ startDate: null })
+  selectorMode = (e, { value }) => {
+    this.selectedAuthor = [];
+    this.startDate = null;
     this.endDate = null;
-    this.setState({ value })
-  }
-  handleChangeAuthors = (e, { value }) => {
-    this.flag = false;
-    this.setState((state, props) => (
-      { test5: value }
-    )
-    );
+    this.setState({ value });
   }
 
-  requestDate = (id_dictionary) => {
+  requestData = (id_dictionary) => {
     this.props.client.query({
       query: AutorsName,
       variables: { id: id_dictionary._tail.array }
     }).then(result => {
-      test89.push(result.data.dictionary)
-      this.setState({ arrTest: test89 })
+      authorsList.push(result.data.dictionary)
+      this.setState({ arrayDictionary: authorsList })
     })
   }
+
+  handleChangeAuthors = (e, { value }) => {
+    authorsList = [];
+    this.selectedAuthor = value;
+
+    if (this.selectedAuthor.length !== 0) {
+    this.props.dictionaries.forEach((dictionary) => {
+      let dictAuthor = dictionary.getIn(['additional_metadata'], ['authors'])
+      if (dictAuthor._root.entries[0][1]._tail) {
+        dictAuthor._root.entries[0][1]._tail.array.forEach(author => {
+          if ( this.selectedAuthor.includes( author ) ) {
+            let idDict = dictionary.getIn(['id'])
+            this.requestData(idDict)
+          }
+        })
+      }
+    })
+    } else {
+      dicts = this.props.dictionaries;
+      this.setState({ arrayDictionary: [] })
+    }
+  }
+
   handleChangeDate = (event) => {
     if (event.currentTarget.offsetParent.className === 'ui big input startDate') {
       this.startDate = event.currentTarget.valueAsNumber;
-      // this.setState({ startDate: event.currentTarget.valueAsNumber })
+
     } else if (event.currentTarget.offsetParent.className === 'ui big input endDate') {
       this.endDate = event.currentTarget.valueAsNumber;
-      // this.setState({ endDate: event.currentTarget.valueAsNumber })
     }
 
     if (this.startDate || this.endDate) {
-      this.props.dictionaries.map(u => {
-        let last_modified_at_Dictionary = u.getIn(['last_modified_at'])
-        let id_dictionary = u.getIn(['id']);
-        last_modified_at_Dictionary_mody = (new Date(Math.trunc(last_modified_at_Dictionary) * 1000)).setHours(0,0,0,0)
-
+      this.props.dictionaries.map(dictionary => {
+        let last_modified_at_Dictionary = dictionary.getIn(['last_modified_at']);
+        let id_dictionary = dictionary.getIn(['id']);
+        last_modified_at_Dictionary_mody = (new Date(Math.trunc(last_modified_at_Dictionary) * 1000)).setHours(0, 0, 0, 0);
 
         if (last_modified_at_Dictionary_mody >= this.startDate && !this.endDate) {
-          console.log('last_modified_at_Dictionary_mody ', new Date(last_modified_at_Dictionary_mody))
-
-          this.requestDate(id_dictionary)
+          this.requestData(id_dictionary)
         } else if (last_modified_at_Dictionary_mody >= this.startDate && last_modified_at_Dictionary_mody <= this.endDate) {
-          console.log('last_modified_at_Dictionary_mody ', new Date(last_modified_at_Dictionary_mody))
-
-          this.requestDate(id_dictionary)
+          this.requestData(id_dictionary)
         } else if (last_modified_at_Dictionary_mody <= this.endDate && !this.startDate) {
-          console.log('last_modified_at_Dictionary_mody ', new Date(last_modified_at_Dictionary_mody))
-
-          this.requestDate(id_dictionary)
+          this.requestData(id_dictionary)
         } else {
-          this.setState({ arrTest: [] })
+          this.setState({ arrayDictionary: [] })
         }
       })
     }
@@ -138,8 +121,9 @@ class AllDicts extends React.Component {
   }
 
 
-  fill = (arr) => {
+  equalValueFilter = (arr) => {
     let result = []
+
     arr.sort(function (a, b) {
       var nameA = a.text.toLowerCase(), nameB = b.text.toLowerCase()
       if (nameA < nameB)
@@ -154,64 +138,40 @@ class AllDicts extends React.Component {
       }
 
     }
+    
     return result
   }
 
-
-
   render() {
-
     const { value } = this.state
     const {
-      languagesTree, dictionaries, perspectives, isAuthenticated, location, data, client
+      languagesTree, dictionaries, perspectives, isAuthenticated, location, data
     } = this.props;
+
+
     if (this.props.data.loading === false) {
       let dictList = data.select_tags_metadata.authors
 
       if (dictList) {
         for (let i = 0; i < dictList.length - 1; i++) {
-
           if (dictList[i] === " ") {
-            return
+            break
           } else {
-
             let obj = {
               key: dictList[i],
               value: dictList[i],
               text: dictList[i],
             }
-            authorsList.push(obj)
+            optionsAuthorsList.push(obj)
           }
         }
       }
     }
 
-    dictionaries.map((dict1) => {
-      let too = dict1.getIn(['additional_metadata'], ['authors'])
-      if (too._root.entries[0][1]._tail) {
-        too._root.entries[0][1]._tail.array.map(author => {
-          this.state.test5.map(el => {
-            if (el === author && !this.flag) {
-              let idDict = dict1.getIn(['id'])
-              this.props.client.query({
-                query: AutorsName,
-                variables: { id: idDict._tail.array }
-              }).then(result => {
-                this.flag = true;
-                test89.push(result.data.dictionary)
-                this.setState({ arrTest: test89 })
+    dicts = dictionaries;
+    if (this.selectedAuthor.length !== 0 || this.startDate || this.endDate) {
 
-              })
-            }
-          })
-
-        })
-      }
-
-    })
-    let dicts = dictionaries;
-    if (this.state.test5.length !== 0 || this.startDate || this.endDate) {
-      const dictsSource = fromJS(this.state.arrTest);
+      const dictsSource = fromJS(this.state.arrayDictionary);
       const localDicts = fromJS(dictionaries);
       const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
       dicts = dictsSource.reduce(
@@ -233,28 +193,31 @@ class AllDicts extends React.Component {
     return (
       <div>
         <Form.Field
+          className='checkbox_radio'
           control={Radio}
-          label='by lang'
+          label='By Language'
           value='1'
           checked={value === '1'}
-          onChange={this.test}
+          onChange={this.selectorMode}
         >
 
         </Form.Field>
         <Form.Field
+          className='checkbox_radio'
           control={Radio}
-          label='by authors'
+          label='By Authors'
           value='2'
           checked={value === '2'}
-          onChange={this.test}
+          onChange={this.selectorMode}
 
         ></Form.Field>
         <Form.Field
+          className='checkbox_radio'
           control={Radio}
-          label='by time'
+          label='By Date'
           value='3'
           checked={value === '3'}
-          onChange={this.test}
+          onChange={this.selectorMode}
 
         >
 
@@ -265,35 +228,29 @@ class AllDicts extends React.Component {
 
         {this.state.value === '2' && (
           <Dropdown
+            className='dropdown_authors'
             placeholder='Select authors'
             onChange={this.handleChangeAuthors}
             fluid
             multiple
             search
             selection
-            options={this.fill(authorsList)}
-
+            options={this.equalValueFilter(optionsAuthorsList)}
           ></Dropdown>
-
-
-
         )}
+
         {this.state.value === '3' && (
-
-          <div>
+          <div className='selected_date'>
+            <label className='labelDate'>Selected start date</label>
+            <br></br>
             <Input className='startDate' type='date' size='big' onBlur={this.handleChangeDate} />
+            <br></br>
+            <label className='labelDate'>Selected end date</label>
+            <br></br>
             <Input className='endDate' type='date' size='big' onBlur={this.handleChangeDate} />
-
           </div>
-
         )}
-
-
-
-
         <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
-
-
       </div>
     );
   }

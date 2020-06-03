@@ -138,7 +138,6 @@ const Home = (props) => {
       <Placeholder/>
     );
   }
-
   // handle legacy links from Lingvodoc 2.0
   // if link has hash like #/dictionary/1/2/perspective/3/4/edit redirect to this version's
   // PerspectiveView page
@@ -172,6 +171,7 @@ const Home = (props) => {
 
   // pre-process dictionary list
   const localDicts = fromJS(localDictionaries);
+  console.log(localDicts,'localDicts')
   const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
   const hasPermission = (p, permission) =>
     (config.buildType === 'server' ? false : permissions.get(permission).has(p.get('id')));
@@ -364,12 +364,12 @@ const AuthWrapper = ({
     }),
     graphql(downloadDictionariesMutation, { name: 'downloadDictionaries' })
   )(Home);
-
   if (config.buildType === 'server') {
     return (
       <Component perspectives={perspectives} grants={grants} languages={languages} isAuthenticated={isAuthenticated} />
     );
   }
+ 
   // proxy and desktop has additional parameter - local dictionaries
   return (
     <Component

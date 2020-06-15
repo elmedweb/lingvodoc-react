@@ -134,7 +134,10 @@ const Tools = graphql(toolsQuery)(({
     </Dropdown>
   );
 });
+const options = [
+  { key: 'рука', text: 'рука', value: 'рука' },
 
+]
 const handlers = compose(
   withState('value', 'updateValue', props => props.filter),
   withHandlers({
@@ -149,7 +152,20 @@ const handlers = compose(
     },
   })
 );
-
+const handlers1 = compose(
+  withState('value', 'updateValue', props => props.filter),
+  withHandlers({
+    onChange(props) {
+      return event => props.updateValue(event.target.innerText);
+    },
+    onSubmit(props) {
+      return (event) => {
+        event.preventDefault();
+        props.submitFilter(props.value);
+      };
+    },
+  })
+);
 const Filter = handlers(({ value, onChange, onSubmit }) => (
   <div className="ui right aligned category search item">
     <form className="ui transparent icon input" onSubmit={onSubmit}>
@@ -160,6 +176,31 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
     </form>
   </div>
 ));
+
+
+
+const DropdownFilter = handlers1(({ value, onChange, onSubmit }) => 
+{
+  return (
+  <div className="ui right aligned category search item">
+    <form className="ui transparent icon input" onSubmit={onSubmit}>
+    <Dropdown placeholder='Skills' 
+    fluid
+ 
+    search
+    selection
+/*     data={options}
+    value={value} */
+    options={options} 
+    onChange={onChange}
+    type="submit"/>
+      <button type="submit" className="white">
+        <i className="search link icon" />
+      </button>
+    </form>
+  </div>
+
+)})
 
 const ModeSelector = compose(
   connect(state => state.user),
@@ -227,6 +268,7 @@ const ModeSelector = compose(
       />
       <Menu.Menu position="right">
         <Filter filter={filter} submitFilter={submitFilter} />
+        <DropdownFilter filter={filter} submitFilter={submitFilter} ></DropdownFilter>
       </Menu.Menu>
     </Menu>
   );});
@@ -293,6 +335,7 @@ const Perspective = ({
       component: Merge,
     }
   });
+
 
   return (
     <Container fluid className="perspective inverted">

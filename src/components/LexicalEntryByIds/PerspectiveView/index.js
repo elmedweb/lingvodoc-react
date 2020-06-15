@@ -22,6 +22,7 @@ const ROWS_PER_PAGE = 20;
 export const queryPerspective = gql`
   query queryPerspective1($id: LingvodocID!) {
     perspective(id: $id) {
+
       id
       translation
       columns {
@@ -49,6 +50,7 @@ export const queryPerspective = gql`
 export const queryLexicalEntries = gql`
   query queryPerspective2($id: LingvodocID!, $entitiesMode: String!) {
     perspective(id: $id) {
+  
       id
       translation
       lexical_entries(mode: $entitiesMode) {
@@ -74,6 +76,7 @@ export const queryLexicalEntries = gql`
           accepted
           additional_metadata {
             link_perspective_id
+            
           }
         }
       }

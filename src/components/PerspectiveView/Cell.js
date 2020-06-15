@@ -21,42 +21,42 @@ query author($perspectiveId:LingvodocID!) {
 }
 `;
 let authors = [];
-let str=null;
-let last_modified_at=null;
-let date=null;
-let BeautifulDate=(timestamp)=>{
-let check=(number)=>{
-if (number<=9){
-  return '0'+number
-}else{
-return  number
+let str = null;
+let last_modified_at = null;
+let date = null;
+let BeautifulDate = (timestamp) => {
+  let check = (number) => {
+    if (number <= 9) {
+      return '0' + number
+    } else {
+      return number
+    }
+  }
+  return check(timestamp.getDate()) + '.' + check(timestamp.getMonth()) + '.' + timestamp.getFullYear();
 }
-}
-return check(timestamp.getDate())  + '.'+check(timestamp.getMonth()) +'.'+timestamp.getFullYear();
-}
-let PanelAuthors=(props)=>{
+let PanelAuthors = (props) => {
 
-props.props.client.query({
-  query: AutorsName,
-  variables: { perspectiveId: props.props.perspectiveId },
+  props.props.client.query({
+    query: AutorsName,
+    variables: { perspectiveId: props.props.perspectiveId },
 
-}).then(result => {
-   authors = result.data.perspective.authors;
-   last_modified_at=result.data.perspective.last_modified_at;
-   date=new Date( Math.trunc(last_modified_at)*1000)
- str=  authors.map(name=>name.name + ' ') + BeautifulDate(date) ;
+  }).then(result => {
+    authors = result.data.perspective.authors;
+    last_modified_at = result.data.perspective.last_modified_at;
+    date = new Date(Math.trunc(last_modified_at) * 1000)
+    str = authors.map(name => name.name + ' ') + BeautifulDate(date);
 
-});
-return(
-<div>{str}</div>
-)
+  });
+  return (
+    <div>{str}</div>
+  )
 }
 
 
 
- function Cell (props)  {
+function Cell(props) {
   const { perspectiveId, entry, column, columns, mode, entitiesMode } = props;
- 
+
 
   return (
 
@@ -73,7 +73,7 @@ return(
           />
         </Table.Cell>
       }>
-   
+
 
     </Popup>
   );

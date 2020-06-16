@@ -331,14 +331,13 @@ export const stringsToTranslate = [
 
 export function getTranslation(string) {
   const translation = i18n.get(string);
-  return (translation == undefined) ? string : translation;
+  return (translation === undefined) ? string : translation;
 }
 
 function setTranslation(string, translatedString) {
-  if (translatedString == null || translatedString == undefined) {
+  if (translatedString == null || translatedString === undefined) {
     i18n.set(string, string);
-  }
-  else {
+  } else {
     i18n.set(string, translatedString);
   }
 }
@@ -346,7 +345,6 @@ function setTranslation(string, translatedString) {
 export function setTranslations(translations) {
   for (let i = 0; i < stringsToTranslate.length; i++) {
     const gist = translations[i];
-    if (gist != null)
-      setTranslation(stringsToTranslate[i], gist.translation);
+    if (gist != null) { setTranslation(stringsToTranslate[i], gist.translation); }
   }
 }

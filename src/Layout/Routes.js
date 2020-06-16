@@ -23,9 +23,9 @@ import NewsEditor from 'pages/NewsEditor';
 
 import DictionariesAll from 'pages/DictionaryAll';
 import TreeRoute from 'pages/TreeRoute';
-import ToolsRoute from 'pages/ToolsRoute'
+import ToolsRoute from 'pages/ToolsRoute';
 import DashboardRoute from 'pages/DashboardRoute';
-import OrganizationRoute from 'pages/OrganizationRoute'
+import OrganizationRoute from 'pages/OrganizationRoute';
 import SupportRoute from 'pages/SupportRoute';
 import NoGrants from 'pages/NoGrants';
 import CorporaAll from 'pages/CorporaAll';
@@ -67,9 +67,6 @@ const Routes = () => (
     <Route path="/news_list" component={NewsList}/>
     <Route path="/news/:news_one" component={News}/>
     <Route component={NotFound} />
-
-
-
 
   </Switch>
 );

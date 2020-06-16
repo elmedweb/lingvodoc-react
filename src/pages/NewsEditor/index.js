@@ -29,11 +29,10 @@ import "./styles.scss"
 import { getTranslation } from 'api/i18n';
 class EditorConvertToHTML extends Component {
   state = {
-    /* editorState: EditorState.createEmpty(), */
-    editorState:null
+    editorState: EditorState.createEmpty(),
   }
 
-  onEditorStateChange = (editorState) => {
+  onEditorStateChange: Function = (editorState) => {
     this.setState({
       editorState,
     });
@@ -47,7 +46,7 @@ class EditorConvertToHTML extends Component {
         <h2>{getTranslation("Preview")}</h2>
         <textarea className="preview"></textarea>
         <h2>{getTranslation("Text news")}</h2>
-      {/*   <Editor
+  {/*       <Editor
           editorState={editorState}
           onEditorStateChange={this.onEditorStateChange}
           wrapperClassName="my-wrapper"

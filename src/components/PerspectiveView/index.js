@@ -129,11 +129,35 @@ const TableComponent = ({
   selectEntries,
   selectedEntries,
   onEntrySelect,
+  selectAllEntries,
+  selectAllIndeterminate,
+  selectAllChecked,
+  onAllEntriesSelect,
+  showEntryId,
+  selectDisabled,
+  selectDisabledIndeterminate,
+  disabledEntrySet,
+  disabledHeader,
+  removeSelectionEntrySet,
   actions,
 }) => (
   <div style={{ overflowY: 'auto' }}>
     <Table celled padded>
-      <TableHeader columns={columns} selectEntries={selectEntries} actions={actions} />
+      <TableHeader
+        columns={columns}
+        entries={entries}
+        selectEntries={selectEntries}
+        selectedEntries={selectedEntries}
+        onEntrySelect={onEntrySelect}
+        selectAllEntries={selectAllEntries}
+        selectAllIndeterminate={selectAllIndeterminate}
+        selectAllChecked={selectAllChecked}
+        onAllEntriesSelect={onAllEntriesSelect}
+        showEntryId={showEntryId}
+        selectDisabled={selectDisabled}
+        selectDisabledIndeterminate={selectDisabledIndeterminate}
+        disabled={disabledHeader}
+        actions={actions} />
       <TableBody
         perspectiveId={perspectiveId}
         entitiesMode={entitiesMode}
@@ -144,6 +168,11 @@ const TableComponent = ({
         selectEntries={selectEntries}
         selectedEntries={selectedEntries}
         onEntrySelect={onEntrySelect}
+        showEntryId={showEntryId}
+        selectDisabled={selectDisabled}
+        selectDisabledIndeterminate={selectDisabledIndeterminate}
+        disabledEntrySet={disabledEntrySet}
+        removeSelectionEntrySet={removeSelectionEntrySet}
       />
     </Table>
   </div>
@@ -473,6 +502,16 @@ const LexicalEntryViewBase = ({
   selectEntries,
   selectedEntries,
   onEntrySelect,
+  selectAllEntries,
+  selectAllIndeterminate,
+  selectAllChecked,
+  onAllEntriesSelect,
+  showEntryId,
+  selectDisabled,
+  selectDisabledIndeterminate,
+  disabledEntrySet,
+  disabledHeader,
+  removeSelectionEntrySet,
   actions,
 }) => {
   const { loading } = data;
@@ -507,6 +546,16 @@ const LexicalEntryViewBase = ({
       selectEntries={selectEntries}
       selectedEntries={selectedEntries}
       onEntrySelect={onEntrySelect}
+      selectAllEntries={selectAllEntries}
+      selectAllIndeterminate={selectAllIndeterminate}
+      selectAllChecked={selectAllChecked}
+      onAllEntriesSelect={onAllEntriesSelect}
+      showEntryId={showEntryId}
+      selectDisabled={selectDisabled}
+      selectDisabledIndeterminate={selectDisabledIndeterminate}
+      disabledEntrySet={disabledEntrySet}
+      disabledHeader={disabledHeader}
+      removeSelectionEntrySet={removeSelectionEntrySet}
     />
   );
 };

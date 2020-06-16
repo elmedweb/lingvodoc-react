@@ -22,7 +22,7 @@ import TopSectionSelector from 'pages/TopSectionSelector';
 import NewsEditor from 'pages/NewsEditor';
 
 import DictionariesAll from 'pages/DictionaryAll';
-import LanguagesDatabasesRoute from 'pages/TreeRoute';
+import TreeRoute from 'pages/TreeRoute';
 import ToolsRoute from 'pages/ToolsRoute'
 import DashboardRoute from 'pages/DashboardRoute';
 import OrganizationRoute from 'pages/OrganizationRoute'
@@ -56,7 +56,7 @@ const Routes = () => (
     <Route path="/files" component={Files} />
     <Route path="/edit_translations" component={EditTranslations} />
     <Route path="/organizations" component={Organizations} />
-    <Route path="/LanguagesDatabasesRoute" component={LanguagesDatabasesRoute} />
+    <Route path="/treeRoute" component={TreeRoute} />
     <Route path="/toolsRoute" component={ToolsRoute} />
     <Route path="/dashboardRoute" component={DashboardRoute} />
     <Route path="/organizationRoute" component={OrganizationRoute} />

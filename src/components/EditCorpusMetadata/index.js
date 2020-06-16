@@ -1,9 +1,11 @@
 import React from 'react';
-import { Button, Form, Segment } from 'semantic-ui-react';
+import { Button, Form, Segment, Label } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 import { getTranslation } from 'api/i18n';
+import SelectSettlementMap from '../SelectSettlement/SelectSettlementMap';
+import SelectSettlementModal from '../SelectSettlement/SelectSettlementModal';
 
 const getMetadataAlternativesQuery = gql`
   query getMetadataAlternatives {
@@ -11,7 +13,7 @@ const getMetadataAlternativesQuery = gql`
   }
 `;
 
-class EditDictionaryMetadata extends React.Component {
+class EditCorpusMetadata extends React.Component {
 
   constructor(props) {
     super(props);
@@ -21,13 +23,13 @@ class EditDictionaryMetadata extends React.Component {
       authors: [],
       humanSettlement: [],
       years: [],
-      interrogator: '',
-      informant: '',
-      processing: '',
-      typeOfDiscourse: '',
-      typeOfSpeech: '',
-      speechGenre: '',
-      theThemeOfTheText: ''
+      titleOfTheWork: '',
+      genre: '',
+      timeOfWriting: '',
+      quantitativeCharacteristic: '',
+      bibliographicDataOfTheSource: '',
+      translator: '',
+      bibliographicDataOfTheTranslation: ''
     };
 
     this.initialState = {
@@ -35,13 +37,13 @@ class EditDictionaryMetadata extends React.Component {
       authors: this.state.authors,
       humanSettlement: this.state.humanSettlement,
       years: this.state.years,
-      interrogator: this.state.interrogator,
-      informant: this.state.informant,
-      processing: this.state.processing,
-      typeOfDiscourse: this.state.typeOfDiscourse,
-      typeOfSpeech: this.state.typeOfSpeech,
-      speechGenre: this.state.speechGenre,
-      theThemeOfTheText: this.state.theThemeOfTheText
+      titleOfTheWork: this.state.titleOfTheWork,
+      genre: this.state.genre,
+      timeOfWriting: this.state.timeOfWriting,
+      quantitativeCharacteristic: this.state.quantitativeCharacteristic,
+      bibliographicDataOfTheSource: this.state.bibliographicDataOfTheSource,
+      translator: this.state.translator,
+      bibliographicDataOfTheTranslation: this.state.bibliographicDataOfTheTranslation
     };
 
     this.onAddNewAlternative = this.onAddNewAlternative.bind(this);
@@ -125,26 +127,26 @@ class EditDictionaryMetadata extends React.Component {
       case 'years':
         this.setState({ years: data.value }, callback);
         break;
-      case 'interrogator':
-        this.setState({ interrogator: data.value }, callback);
+      case 'titleOfTheWork':
+        this.setState({ titleOfTheWork: data.value }, callback);
         break;
-      case 'informant':
-        this.setState({ informant: data.value }, callback);
+      case 'genre':
+        this.setState({ genre: data.value }, callback);
         break;
-      case 'processing':
-        this.setState({ processing: data.value }, callback);
+      case 'timeOfWriting':
+        this.setState({ timeOfWriting: data.value }, callback);
         break;
-      case 'typeOfDiscourse':
-        this.setState({ typeOfDiscourse: data.value }, callback);
+      case 'quantitativeCharacteristic':
+        this.setState({ quantitativeCharacteristic: data.value }, callback);
         break;
-      case 'typeOfSpeech':
-        this.setState({ typeOfSpeech: data.value }, callback);
+      case 'bibliographicDataOfTheSource':
+        this.setState({ bibliographicDataOfTheSource: data.value }, callback);
         break;
-      case 'speechGenre':
-        this.setState({ speechGenre: data.value }, callback);
+      case 'translator':
+        this.setState({ translator: data.value }, callback);
         break;
-      case 'theThemeOfTheText':
-        this.setState({ theThemeOfTheText: data.value }, callback);
+      case 'bibliographicDataOfTheTranslation':
+        this.setState({ bibliographicDataOfTheTranslation: data.value }, callback);
         break;
       default:
         return;
@@ -178,33 +180,33 @@ class EditDictionaryMetadata extends React.Component {
         toSave = { years: this.state.years };
         this.initialState.years = toSave.years;
         break;
-      case 'interrogator':
-        toSave = { interrogator: this.state.interrogator };
-        this.initialState.interrogator = toSave.interrogator;
+      case 'titleOfTheWork':
+        toSave = { titleOfTheWork: this.state.titleOfTheWork };
+        this.initialState.titleOfTheWork = toSave.titleOfTheWork;
         break;
-      case 'informant':
-        toSave = { informant: this.state.informant };
-        this.initialState.informant = toSave.informant;
+      case 'genre':
+        toSave = { genre: this.state.genre };
+        this.initialState.genre = toSave.genre;
         break;
-      case 'processing':
-        toSave = { processing: this.state.processing };
-        this.initialState.processing = toSave.processing;
+      case 'timeOfWriting':
+        toSave = { timeOfWriting: this.state.timeOfWriting };
+        this.initialState.timeOfWriting = toSave.timeOfWriting;
         break;
-      case 'typeOfDiscourse':
-        toSave = { typeOfDiscourse: this.state.typeOfDiscourse };
-        this.initialState.typeOfDiscourse = toSave.typeOfDiscourse;
+      case 'quantitativeCharacteristic':
+        toSave = { quantitativeCharacteristic: this.state.quantitativeCharacteristic };
+        this.initialState.quantitativeCharacteristic = toSave.quantitativeCharacteristic;
         break;
-      case 'typeOfSpeech':
-        toSave = { typeOfSpeech: this.state.typeOfSpeech };
-        this.initialState.typeOfSpeech = toSave.typeOfSpeech;
+      case 'bibliographicDataOfTheSource':
+        toSave = { bibliographicDataOfTheSource: this.state.bibliographicDataOfTheSource };
+        this.initialState.bibliographicDataOfTheSource = toSave.bibliographicDataOfTheSource;
         break;
-      case 'speechGenre':
-        toSave = { speechGenre: this.state.speechGenre };
-        this.initialState.speechGenre = toSave.speechGenre;
+      case 'translator':
+        toSave = { translator: this.state.translator };
+        this.initialState.translator = toSave.translator;
         break;
-      case 'theThemeOfTheText':
-        toSave = { theThemeOfTheText: this.state.theThemeOfTheText };
-        this.initialState.theThemeOfTheText = toSave.theThemeOfTheText;
+      case 'bibliographicDataOfTheTranslation':
+        toSave = { bibliographicDataOfTheTranslation: this.state.bibliographicDataOfTheTranslation };
+        this.initialState.bibliographicDataOfTheTranslation = toSave.bibliographicDataOfTheTranslation;
         break;
       default:
         return;
@@ -212,6 +214,23 @@ class EditDictionaryMetadata extends React.Component {
 
     if (toSave) {
       this.props.onSave(toSave);
+    }
+  }
+
+  settlementSelected ( settlement ) {
+    const callback =() => {
+      if ( this.props.onChange ) {
+        this.props.onChange( this.state );
+      }
+    };
+
+    const isSettlementAdded = this.settlementsOptions.some( ( item ) => {
+      return item.value === settlement;
+    });
+
+    if ( !isSettlementAdded ) {
+      this.settlementsOptions.push({ text: settlement, value: settlement });
+      this.setState({ humanSettlement: this.state.humanSettlement.concat([ settlement ]) }, callback );
     }
   }
 
@@ -242,13 +261,14 @@ class EditDictionaryMetadata extends React.Component {
       authors,
       humanSettlement,
       years,
-      interrogator,
-      informant,
-      processing,
-      typeOfDiscourse,
-      typeOfSpeech,
-      speechGenre,
-      theThemeOfTheText } = this.state;
+      titleOfTheWork,
+      genre,
+      timeOfWriting,
+      quantitativeCharacteristic,
+      bibliographicDataOfTheSource,
+      translator,
+      bibliographicDataOfTheTranslation
+    } = this.state;
 
     return (
       <Form>
@@ -285,38 +305,14 @@ class EditDictionaryMetadata extends React.Component {
                 onClick={() => this.onSaveValue('authors')}
               />
             }
-            <Form.Input fluid
-              label={getTranslation("Interrogator")}
-              value={interrogator}
-              onChange={(event, data) => this.onChangeValue('interrogator', data)}
-            />
-            {mode != 'create' &&
-              <Form.Button
-                floated='right'
-                positive
-                content={getTranslation("Save")}
-                disabled={interrogator == this.initialState.interrogator}
-                onClick={() => this.onSaveValue('interrogator')}
-              />
-            }
-            <Form.Input fluid
-              label={getTranslation("Informant")}
-              value={informant}
-              onChange={(event, data) => this.onChangeValue('informant', data)}
-            />
-            {mode != 'create' &&
-              <Form.Button
-                floated='right'
-                positive
-                content={getTranslation("Save")}
-                disabled={informant == this.initialState.informant}
-                onClick={() => this.onSaveValue('informant')}
-              />
-            }
           </Form.Group>
         </Segment>
         <Segment>
           <Form.Group widths='equal'>
+            <SelectSettlementModal
+              content={ SelectSettlementMap }
+              callback = { this.settlementSelected.bind( this ) }
+            />
             <Form.Dropdown fluid multiple selection search allowAdditions
               label={getTranslation("Human settlement")}
               options={this.settlementsOptions}
@@ -354,17 +350,17 @@ class EditDictionaryMetadata extends React.Component {
         <Segment>
           <Form.Group widths='equal'>
             <Form.Input fluid
-              label={getTranslation("Processing")}
-              value={processing}
-              onChange={(event, data) => this.onChangeValue('processing', data)}
+              label={getTranslation("Title of the work")}
+              value={titleOfTheWork}
+              onChange={(event, data) => this.onChangeValue('titleOfTheWork', data)}
             />
             {mode != 'create' &&
               <Form.Button
                 floated='right'
                 positive
                 content={getTranslation("Save")}
-                disabled={processing == this.initialState.processing}
-                onClick={() => this.onSaveValue('processing')}
+                disabled={titleOfTheWork == this.initialState.titleOfTheWork}
+                onClick={() => this.onSaveValue('titleOfTheWork')}
               />
             }
           </Form.Group>
@@ -372,45 +368,17 @@ class EditDictionaryMetadata extends React.Component {
         <Segment>
           <Form.Group widths='equal'>
             <Form.Input fluid
-              label={getTranslation("Type of discourse")}
-              value={typeOfDiscourse}
-              onChange={(event, data) => this.onChangeValue('typeOfDiscourse', data)}
+              label={getTranslation("Genre")}
+              value={genre}
+              onChange={(event, data) => this.onChangeValue('genre', data)}
             />
             {mode != 'create' &&
               <Form.Button
                 floated='right'
                 positive
                 content={getTranslation("Save")}
-                disabled={typeOfDiscourse == this.initialState.typeOfDiscourse}
-                onClick={() => this.onSaveValue('typeOfDiscourse')}
-              />
-            }
-            <Form.Input fluid
-              label={getTranslation("Type of speech")}
-              value={typeOfSpeech}
-              onChange={(event, data) => this.onChangeValue('typeOfSpeech', data)}
-            />
-            {mode != 'create' &&
-              <Form.Button
-                floated='right'
-                positive
-                content={getTranslation("Save")}
-                disabled={typeOfSpeech == this.initialState.typeOfSpeech}
-                onClick={() => this.onSaveValue('typeOfSpeech')}
-              />
-            }
-            <Form.Input fluid
-              label={getTranslation("Speech genre")}
-              value={speechGenre}
-              onChange={(event, data) => this.onChangeValue('speechGenre', data)}
-            />
-            {mode != 'create' &&
-              <Form.Button
-                floated='right'
-                positive
-                content={getTranslation("Save")}
-                disabled={speechGenre == this.initialState.speechGenre}
-                onClick={() => this.onSaveValue('speechGenre')}
+                disabled={genre == this.initialState.genre}
+                onClick={() => this.onSaveValue('genre')}
               />
             }
           </Form.Group>
@@ -418,32 +386,105 @@ class EditDictionaryMetadata extends React.Component {
         <Segment>
           <Form.Group widths='equal'>
             <Form.Input fluid
-              label={getTranslation("The theme of the text")}
-              value={theThemeOfTheText}
-              onChange={(event, data) => this.onChangeValue('theThemeOfTheText', data)}
+              label={getTranslation("Time of writing")}
+              value={timeOfWriting}
+              onChange={(event, data) => this.onChangeValue('timeOfWriting', data)}
             />
             {mode != 'create' &&
               <Form.Button
                 floated='right'
                 positive
                 content={getTranslation("Save")}
-                disabled={theThemeOfTheText == this.initialState.theThemeOfTheText}
-                onClick={() => this.onSaveValue('theThemeOfTheText')}
+                disabled={timeOfWriting == this.initialState.timeOfWriting}
+                onClick={() => this.onSaveValue('timeOfWriting')}
               />
             }
           </Form.Group>
         </Segment>
+        <Segment>
+          <Form.Group widths='equal'>
+            <Form.Input fluid
+              label={getTranslation("Quantitative characteristic")}
+              value={quantitativeCharacteristic}
+              onChange={(event, data) => this.onChangeValue('quantitativeCharacteristic', data)}
+            />
+            {mode != 'create' &&
+              <Form.Button
+                floated='right'
+                positive
+                content={getTranslation("Save")}
+                disabled={quantitativeCharacteristic == this.initialState.quantitativeCharacteristic}
+                onClick={() => this.onSaveValue('quantitativeCharacteristic')}
+              />
+            }
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group widths='equal'>
+            <Form.Input fluid
+              label={getTranslation("Bibliographic data of the source")}
+              value={bibliographicDataOfTheSource}
+              onChange={(event, data) => this.onChangeValue('bibliographicDataOfTheSource', data)}
+            />
+            {mode != 'create' &&
+              <Form.Button
+                floated='right'
+                positive
+                content={getTranslation("Save")}
+                disabled={bibliographicDataOfTheSource == this.initialState.bibliographicDataOfTheSource}
+                onClick={() => this.onSaveValue('bibliographicDataOfTheSource')}
+              />
+            }
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group widths='equal'>
+            <Form.Input fluid
+              label={getTranslation("Translator")}
+              value={translator}
+              onChange={(event, data) => this.onChangeValue('translator', data)}
+            />
+            {mode != 'create' &&
+              <Form.Button
+                floated='right'
+                positive
+                content={getTranslation("Save")}
+                disabled={translator == this.initialState.translator}
+                onClick={() => this.onSaveValue('translator')}
+              />
+            }
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group widths='equal'>
+            <Form.Input fluid
+              label={getTranslation("Bibliographic data of the translation")}
+              value={bibliographicDataOfTheTranslation}
+              onChange={(event, data) => this.onChangeValue('bibliographicDataOfTheTranslation', data)}
+            />
+            {mode != 'create' &&
+              <Form.Button
+                floated='right'
+                positive
+                content={getTranslation("Save")}
+                disabled={bibliographicDataOfTheTranslation == this.initialState.bibliographicDataOfTheTranslation}
+                onClick={() => this.onSaveValue('bibliographicDataOfTheTranslation')}
+              />
+            }
+          </Form.Group>
+        </Segment>
+        
       </Form>
     );
   }
 
 }
 
-EditDictionaryMetadata.propTypes = {
+EditCorpusMetadata.propTypes = {
   mode: PropTypes.string.isRequired,
   metadata: PropTypes.object,
   onChange: PropTypes.func,
   onSave: PropTypes.func
 };
 
-export default graphql(getMetadataAlternativesQuery)(EditDictionaryMetadata);
+export default graphql(getMetadataAlternativesQuery)(EditCorpusMetadata);

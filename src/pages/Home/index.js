@@ -22,6 +22,8 @@ import { getScrollContainer } from './common';
 import { getTranslation } from 'api/i18n';
 import './published.scss';
 
+
+
 const authenticatedDictionariesQuery = gql`
   query AuthDictionaries {
     dictionaries(proxy: true) {

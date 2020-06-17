@@ -1,4 +1,4 @@
-/* eslint-disable padded-blocks */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { pure, onlyUpdateForKeys, compose } from 'recompose';
@@ -55,16 +55,9 @@ let PanelAuthors = (props) => {
 
 
 
-const Cell = ({
-  perspectiveId,
-  entry,
-  column,
-  columns,
-  mode,
-  entitiesMode,
-  disabled,
-// eslint-disable-next-line arrow-body-style
-}) => {
+function Cell(props) {
+  const { perspectiveId, entry, column, columns, mode, entitiesMode } = props;
+
 
   return (
 
@@ -94,7 +87,6 @@ Cell.propTypes = {
   columns: PropTypes.array.isRequired,
   mode: PropTypes.string.isRequired,
   entitiesMode: PropTypes.string.isRequired,
-  disabled: PropTypes.bool.isRequired,
 };
 
 export default compose(onlyUpdateForKeys(['perspectiveId', 'entry', 'mode']), withApollo)(Cell);

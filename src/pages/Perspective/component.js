@@ -12,6 +12,7 @@ import Merge from 'components/Merge';
 import NotFound from 'pages/NotFound';
 import { getTranslation } from 'api/i18n';
 import PerspectivePath from './PerspectivePath';
+import smoothScroll from 'utils/smoothscroll';
 
 import './style.scss';
 
@@ -58,8 +59,7 @@ const Tools = graphql(toolsQuery)(({
   openPhonologyModal,
   launchSoundAndMarkup,
   id,
-  mode
-}) => {
+  mode }) => {
   if (data.loading || data.error) {
     return null;
   }
@@ -217,14 +217,17 @@ const ModeSelector = compose(
   connect(state => state.user),
   onlyUpdateForKeys(['mode', 'baseUrl', 'filter', 'user'])
 )(({
-  mode,
-  baseUrl,
-  filter,
+  mode, baseUrl, filter,
   submitFilter,
   openCognateAnalysisModal,
+  openCognateAcousticAnalysisModal,
+  openCognateMultiModal,
+  openCognateReconstructionModal,
+  openCognateSuggestionsModal,
   openPhonemicAnalysisModal,
   openPhonologyModal,
-  launchSoundAndMarkup,
+  openPhonologicalStatisticalDistanceModal,
+  soundAndMarkup,
   id,
   user
 }) => {
@@ -263,19 +266,25 @@ const ModeSelector = compose(
 
   return (
     <Menu tabular>
-      { map(modes, (info, stub) =>
+      {map(modes, (info, stub) =>
         <Menu.Item key={stub} as={Link} to={`${baseUrl}/${stub}`} active={mode === stub}>
           {info.text}
           {info.component === PerspectiveView ? <Counter id={id} mode={info.entitiesMode} /> : null}
-        </Menu.Item>)}
-      <Tools
-        id={id}
-        mode={mode}
-        openCognateAnalysisModal={openCognateAnalysisModal}
-        openPhonemicAnalysisModal={openPhonemicAnalysisModal}
-        openPhonologyModal={openPhonologyModal}
-        launchSoundAndMarkup={launchSoundAndMarkup}
-      />
+        </Menu.Item>
+      )}
+      <Dropdown item text={getTranslation("Tools")}>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={openCognateAnalysisModal}>{getTranslation("Cognate analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateAcousticAnalysisModal}>{getTranslation("Cognate acoustic analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateMultiModal}>{getTranslation("Cognate multi-language reconstruction")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateReconstructionModal}>{getTranslation("Cognate reconstruction")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateSuggestionsModal}>{getTranslation("Cognate suggestions")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonemicAnalysisModal}>{getTranslation("Phonemic analysis")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologyModal}>{getTranslation("Phonology")}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologicalStatisticalDistanceModal}>{getTranslation("Phonological statistical distance")}</Dropdown.Item>
+          <Dropdown.Item onClick={soundAndMarkup}>{getTranslation("Sound and markup")}</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
       <Menu.Menu position="right">
         <Filter filter={filter} submitFilter={submitFilter} />
         <DropdownFilter filter={filter} submitFilter={submitFilter} ></DropdownFilter>
@@ -299,93 +308,106 @@ const soundAndMarkup = (perspectiveId, mode, launchSoundAndMarkup) => {
     }
   );
 };
+const getScrollContainer = (className) => document.querySelector(`.${className}`);
 
-const Perspective = ({
-  perspective,
-  submitFilter,
-  openCognateAnalysisModal,
-  openPhonemicAnalysisModal,
-  openPhonologyModal,
-  launchSoundAndMarkup,
-  user
-}) => {
-  const {
-    id, parent_id, mode, page, baseUrl
-  } = perspective.params;
-  if (!baseUrl) {
-    return null;
+class Perspective extends React.Component {
+  constructor(props) {
+    super(props);
   }
 
-  const modes = {};
-  if (user.id !== undefined) {
+  componentDidMount() {
+    const container = getScrollContainer('pusher');
+
+    smoothScroll(0, 0, null, container);
+  }
+
+
+  render() {
+    const {
+      perspective,
+      submitFilter,
+      openCognateAnalysisModal,
+      openPhonemicAnalysisModal,
+      openPhonologyModal,
+      launchSoundAndMarkup,
+      user
+    } = this.props;
+    const {
+      id, parent_id, mode, page, baseUrl,
+    } = perspective.params;
+
+    if (!baseUrl) return null;
+    const modes = {};
+    if (user.id !== undefined) {
+      Object.assign(modes, {
+        edit: {
+          entitiesMode: 'all',
+          text: getTranslation('Edit'),
+          component: PerspectiveView,
+        },
+        publish: {
+          entitiesMode: 'all',
+          text: getTranslation('Publish'),
+          component: PerspectiveView,
+        }
+      });
+    }
     Object.assign(modes, {
-      edit: {
-        entitiesMode: 'all',
-        text: getTranslation('Edit'),
+      view: {
+        entitiesMode: 'published',
+        text: getTranslation('View published'),
         component: PerspectiveView,
       },
-      publish: {
-        entitiesMode: 'all',
-        text: getTranslation('Publish'),
+      contributions: {
+        entitiesMode: 'not_accepted',
+        text: getTranslation('View contributions'),
         component: PerspectiveView,
+      },
+      merge: {
+        entitiesMode: 'all',
+        text: getTranslation('Merge suggestions'),
+        component: Merge,
       }
     });
+  
+    return (
+      <Container fluid className="perspective inverted">
+        <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />
+        <ModeSelector
+          mode={mode}
+          id={id}
+          baseUrl={baseUrl}
+          filter={perspective.filter}
+          submitFilter={submitFilter}
+          openCognateAnalysisModal={openCognateAnalysisModal}
+          openPhonemicAnalysisModal={openPhonemicAnalysisModal}
+          openPhonologyModal={openPhonologyModal}
+          launchSoundAndMarkup={launchSoundAndMarkup}
+        />
+        <Switch>
+          <Redirect exact from={baseUrl} to={`${baseUrl}/view`} />
+          {map(modes, (info, stub) => (
+            <Route
+              key={stub}
+              path={`${baseUrl}/${stub}`}
+              render={() => (
+                <info.component
+                  id={id}
+                  mode={mode}
+                  entitiesMode={info.entitiesMode}
+                  page={page}
+                  filter={perspective.filter}
+                  className="content"
+                />
+              )}
+            />
+          ))}
+          <Route component={NotFound} />
+        </Switch>
+      </Container>
+    );
   }
-  Object.assign(modes, {
-    view: {
-      entitiesMode: 'published',
-      text: getTranslation('View published'),
-      component: PerspectiveView,
-    },
-    contributions: {
-      entitiesMode: 'not_accepted',
-      text: getTranslation('View contributions'),
-      component: PerspectiveView,
-    },
-    merge: {
-      entitiesMode: 'all',
-      text: getTranslation('Merge suggestions'),
-      component: Merge,
-    }
-  });
 
-
-  return (
-    <Container fluid className="perspective inverted">
-      <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />
-      <ModeSelector
-        mode={mode}
-        id={id}
-        baseUrl={baseUrl}
-        filter={perspective.filter}
-        submitFilter={submitFilter}
-        openCognateAnalysisModal={openCognateAnalysisModal}
-        openPhonemicAnalysisModal={openPhonemicAnalysisModal}
-        openPhonologyModal={openPhonologyModal}
-        launchSoundAndMarkup={launchSoundAndMarkup}
-      />
-      <Switch>
-        <Redirect exact from={baseUrl} to={`${baseUrl}/view`} />
-        { map(modes, (info, stub) => (
-          <Route
-            key={stub}
-            path={`${baseUrl}/${stub}`}
-            render={() => (
-              <info.component
-                id={id}
-                mode={mode}
-                entitiesMode={info.entitiesMode}
-                page={page}
-                filter={perspective.filter}
-                className="content"
-              />
-            )}
-          />
-        ))}
-        <Route component={NotFound} />
-      </Switch>
-    </Container>
-  );
 };
 
 Perspective.propTypes = {

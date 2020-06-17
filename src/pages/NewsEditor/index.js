@@ -1,31 +1,22 @@
 
-/* import React, { Component } from 'react';
-import { Editor } from 'react-draft-wysiwyg';
 
-const test =()=>{
+import React, { Component } from 'react';
+
+const EditorConvertToHTML=()=>{
   return(
     <div>
-   <Editor
-          editorState={editorState}
-          wrapperClassName="demo-wrapper"
-          editorClassName="demo-editor"
-          onEditorStateChange={this.onEditorStateChange}
-        />
-        
+      werwr
     </div>
   )
 }
 
-export default test;   */
-
-import React, { Component } from 'react';
 /* import { EditorState, convertToRaw } from 'draft-js'; */
 /* import { Editor } from 'react-draft-wysiwyg'; */
 /* import draftToHtml from 'draftjs-to-html';
 import htmlToDraft from 'html-to-draftjs'; */
-import { Button } from 'semantic-ui-react';
+/* import { Button } from 'semantic-ui-react'; */
 /* import "../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css" */
-import "./styles.scss"
+/* import "./styles.scss"
 import { getTranslation } from 'api/i18n';
 class EditorConvertToHTML extends Component {
   state = {
@@ -46,12 +37,12 @@ class EditorConvertToHTML extends Component {
         <h2>{getTranslation("Preview")}</h2>
         <textarea className="preview"></textarea>
         <h2>{getTranslation("Text news")}</h2>
-  {/*       <Editor
+        <Editor
           editorState={editorState}
           onEditorStateChange={this.onEditorStateChange}
           wrapperClassName="my-wrapper"
           editorClassName="my-editor-class"
-        /> */}
+        />
         <div className="date">
           <div className="input-date" >
             <h3>{getTranslation("Publication date")}</h3>
@@ -70,5 +61,5 @@ class EditorConvertToHTML extends Component {
       </div>
     );
   }
-}
+} */
 export default EditorConvertToHTML

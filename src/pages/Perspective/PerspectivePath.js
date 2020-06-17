@@ -15,6 +15,7 @@ import { openSaveDictionaryModal } from 'ducks/saveDictionary';
 import { openStatistics } from 'ducks/statistics';
 import { getTranslation } from 'api/i18n';
 
+
 const queryPerspectivePath = gql`
   query queryPerspectivePath($id: LingvodocID!) {
     perspective(id: $id) {
@@ -44,6 +45,67 @@ const queryAvailablePerspectives = gql`
  * Perspective breadcrumb component.
  */
 class PerspectivePath extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  getCommonTreeSection({ treeElement }) {
+    const section = {
+      key: null,
+      content: null
+    };
+
+    section.key = treeElement.id;
+    section.link = true;
+    section.content = treeElement.translation;
+    section.as = Link;
+    section.to = `/dashboard/dictionaries_all?anchor=${treeElement.id}`;
+
+    return section;
+  };
+
+  getPerspectiveTreeSection({ treeElement, perspectives, mode, dictionary_id, tree, id, actions }) {
+    const section = {
+      key: null,
+      content: null
+    };
+
+    section.key = treeElement.id;
+    section.active = true;
+    section.content = <Dropdown inline text={treeElement.translation}>
+      <Dropdown.Menu>
+        {perspectives.filter(perspective => perspective.id != tree[0].id).map(perspective => (
+          <Dropdown.Item
+            as='a'
+            key={perspective.id}
+            href={`${window.location.protocol}//${window.location.host}/dictionary/${perspective.parent_id.join('/')}/perspective/${perspective.id.join('/')}/${mode}`}
+            icon='chevron right'
+            text={perspective.translation}
+          />))
+        }
+        <Dropdown.Divider />
+        <Dropdown.Item
+          icon='users'
+          text={getTranslation(`'${treeElement.translation}' roles...`)}
+          onClick={() => actions.openRoles(id, 'perspective')}
+        />
+        <Dropdown.Item
+          icon='setting'
+          text={getTranslation(`'${treeElement.translation}' properties...`)}
+          onClick={() => actions.openPerspectivePropertiesModal(id, dictionary_id)}
+        />
+        <Dropdown.Item
+          icon='percent'
+          text={getTranslation(`'${treeElement.translation}' statistics...`)}
+          onClick={() => actions.openStatistics(id, 'perspective')}
+        />
+      </Dropdown.Menu>
+    </Dropdown>;
+
+    return section;
+  }
+
   render() {
     /* eslint-disable no-shadow */
     const {
@@ -57,114 +119,19 @@ class PerspectivePath extends React.Component {
     const { perspective: { tree } } = queryPerspectivePath;
     const { perspectives } = queryAvailablePerspectives.dictionary;
 
+    const sections = tree.slice().reverse().map((e, index) => {
+      if (perspectives.length > 1 && index == tree.length - 1) {
+        return this.getPerspectiveTreeSection({ treeElement: e, perspectives, mode, dictionary_id, tree, id, actions })
+      } else {
+        return this.getCommonTreeSection({ treeElement: e });
+      }
+    });
+
     return (
       <Header as="h2" className={className}>
         <Breadcrumb
           icon="right angle"
-          sections={tree.slice().reverse().map((e, index) => ({
-              key: e.id,
-              content:
-
-                // eslint-disable-next-line no-nested-ternary
-                index === tree.length - 1 ?
-
-                  <Dropdown inline text={e.translation}>
-                    <Dropdown.Menu>
-
-                      {perspectives.length > 1 && [
-
-                        (perspectives.filter(pers => pers.id !== tree[0].id).map(pers => (
-                          <Dropdown.Item
-                            key={pers.id}
-                            as={Link}
-                            to={`/dictionary/${pers.parent_id.join('/')}/perspective/${pers.id.join('/')}/${mode}`}
-                            icon="chevron right"
-                            text={pers.translation}
-                          />))
-                        ),
-
-                        <Dropdown.Divider
-                          key="divider"
-                        />
-                      ]}
-
-                      { user.id !== undefined &&
-                        [
-                          <Dropdown.Item
-                            key="roles"
-                            icon="users"
-                            text={`'${e.translation}' ${getTranslation('Roles').toLowerCase()}...`}
-                            onClick={() => actions.openRoles(id, 'perspective', `'${e.translation}' ${getTranslation('Roles').toLowerCase()}`)}
-                          />,
-                          <Dropdown.Item
-                            key="properties"
-                            icon="setting"
-                            text={`'${e.translation}' ${getTranslation('Properties').toLowerCase()}...`}
-                            onClick={() => actions.openPerspectivePropertiesModal(id, dictionary_id, `'${e.translation}' ${getTranslation('Propeties').toLowerCase()}`)}
-                          />
-                        ]
-                      }
-                      <Dropdown.Item
-                        key="statistics"
-                        icon="percent"
-                        text={`'${e.translation}' ${getTranslation('Statistics').toLowerCase()}...`}
-                        onClick={() => actions.openStatistics(id, 'perspective', `'${e.translation}' ${getTranslation('Statistics').toLowerCase()}`)}
-                      />
-
-                    </Dropdown.Menu>
-                  </Dropdown> :
-
-                index === tree.length - 2 ?
-
-                  <Dropdown inline text={e.translation}>
-                    <Dropdown.Menu>
-
-                      {user.id !== undefined && [
-
-                        <Dropdown.Item
-                          key="roles"
-                          icon="users"
-                          text={`'${e.translation}' ${getTranslation('Roles').toLowerCase()}...`}
-                          onClick={() => actions.openRoles(dictionary_id, 'dictionary', `'${e.translation}' ${getTranslation('Roles').toLowerCase()}`)}
-                        />,
-
-                        <Dropdown.Item
-                          key="properties"
-                          icon="setting"
-                          text={`'${e.translation}' ${getTranslation('Properties').toLowerCase()}...`}
-                          onClick={() => actions.openDictionaryPropertiesModal(dictionary_id, `'${e.translation}' ${getTranslation('Propeties').toLowerCase()}`)}
-                        />,
-
-                        <Dropdown.Item
-                          key="organizations"
-                          icon="address book"
-                          text={`'${e.translation}' ${getTranslation('Organizations').toLowerCase()}...`}
-                          onClick={() => actions.openDictionaryOrganizationsModal(dictionary_id, `'${e.translation}' ${getTranslation('Propeties').toLowerCase()}`)}
-                        />,
-
-                      ]}
-
-                      <Dropdown.Item
-                        key="statistics"
-                        icon="percent"
-                        text={`'${e.translation}' ${getTranslation('Statistics').toLowerCase()}...`}
-                        onClick={() => actions.openStatistics(dictionary_id, 'dictionary', `'${e.translation}' ${getTranslation('Statistics').toLowerCase()}`)}
-                      />
-
-                      <Dropdown.Item
-                        key="save"
-                        icon="save"
-                        text={`${getTranslation('Save dictionary')} '${e.translation}'...`}
-                        onClick={() => actions.openSaveDictionaryModal(dictionary_id)}
-                      />
-
-                    </Dropdown.Menu>
-                  </Dropdown> :
-
-                e.translation,
-
-              link: false
-            }))}
+          sections={ sections }
         />
       </Header>
     );

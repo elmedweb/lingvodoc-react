@@ -47,7 +47,6 @@ const TopSectionSelector = (props) => {
       <Link to="/supportRoute">
         <img className="img-support img" src={imgSupport} alt="support" />
       </Link>
-    {/*   <News /> */}
 
     </div>
 

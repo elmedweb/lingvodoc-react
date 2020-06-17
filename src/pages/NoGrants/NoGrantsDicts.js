@@ -25,7 +25,6 @@ function GrantedDicts(props) {
     .reduce((acc, dict) => acc.set(dict.get('id'), dict), new Map());
 
 
-
   // build tree of dictionaries not included in grants
   const restTree = assignDictsToTree(
     buildDictTrees(fromJS({

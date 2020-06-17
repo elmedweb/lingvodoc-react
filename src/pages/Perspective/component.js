@@ -13,7 +13,6 @@ import NotFound from 'pages/NotFound';
 import { getTranslation } from 'api/i18n';
 import PerspectivePath from './PerspectivePath';
 import smoothScroll from 'utils/smoothscroll';
-
 import './style.scss';
 
 export const launchSoundAndMarkupMutation = gql`
@@ -59,7 +58,8 @@ const Tools = graphql(toolsQuery)(({
   openPhonologyModal,
   launchSoundAndMarkup,
   id,
-  mode }) => {
+  mode,
+}) => {
   if (data.loading || data.error) {
     return null;
   }
@@ -145,10 +145,7 @@ const Tools = graphql(toolsQuery)(({
     </Dropdown>
   );
 });
-const options = [
-  { key: 'рука', text: 'рука', value: 'рука' },
 
-]
 const handlers = compose(
   withState('value', 'updateValue', props => props.filter),
   withHandlers({
@@ -163,20 +160,7 @@ const handlers = compose(
     },
   })
 );
-const handlers1 = compose(
-  withState('value', 'updateValue', props => props.filter),
-  withHandlers({
-    onChange(props) {
-      return event => props.updateValue(event.target.innerText);
-    },
-    onSubmit(props) {
-      return (event) => {
-        event.preventDefault();
-        props.submitFilter(props.value);
-      };
-    },
-  })
-);
+
 const Filter = handlers(({ value, onChange, onSubmit }) => (
   <div className="ui right aligned category search item">
     <form className="ui transparent icon input" onSubmit={onSubmit}>
@@ -188,30 +172,6 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
   </div>
 ));
 
-
-
-const DropdownFilter = handlers1(({ value, onChange, onSubmit }) => 
-{
-  return (
-  <div className="ui right aligned category search item">
-    <form className="ui transparent icon input" onSubmit={onSubmit}>
-    <Dropdown placeholder='Skills' 
-    fluid
- 
-    search
-    selection
-/*     data={options}
-    value={value} */
-    options={options} 
-    onChange={onChange}
-    type="submit"/>
-      <button type="submit" className="white">
-        <i className="search link icon" />
-      </button>
-    </form>
-  </div>
-
-)})
 
 const ModeSelector = compose(
   connect(state => state.user),
@@ -270,24 +230,22 @@ const ModeSelector = compose(
         <Menu.Item key={stub} as={Link} to={`${baseUrl}/${stub}`} active={mode === stub}>
           {info.text}
           {info.component === PerspectiveView ? <Counter id={id} mode={info.entitiesMode} /> : null}
-        </Menu.Item>
-      )}
-      <Dropdown item text={getTranslation("Tools")}>
+        </Menu.Item>)}
+      <Dropdown item text={getTranslation('Tools')}>
         <Dropdown.Menu>
-          <Dropdown.Item onClick={openCognateAnalysisModal}>{getTranslation("Cognate analysis")}</Dropdown.Item>
-          <Dropdown.Item onClick={openCognateAcousticAnalysisModal}>{getTranslation("Cognate acoustic analysis")}</Dropdown.Item>
-          <Dropdown.Item onClick={openCognateMultiModal}>{getTranslation("Cognate multi-language reconstruction")}</Dropdown.Item>
-          <Dropdown.Item onClick={openCognateReconstructionModal}>{getTranslation("Cognate reconstruction")}</Dropdown.Item>
-          <Dropdown.Item onClick={openCognateSuggestionsModal}>{getTranslation("Cognate suggestions")}</Dropdown.Item>
-          <Dropdown.Item onClick={openPhonemicAnalysisModal}>{getTranslation("Phonemic analysis")}</Dropdown.Item>
-          <Dropdown.Item onClick={openPhonologyModal}>{getTranslation("Phonology")}</Dropdown.Item>
-          <Dropdown.Item onClick={openPhonologicalStatisticalDistanceModal}>{getTranslation("Phonological statistical distance")}</Dropdown.Item>
-          <Dropdown.Item onClick={soundAndMarkup}>{getTranslation("Sound and markup")}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateAnalysisModal}>{getTranslation('Cognate analysis')}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateAcousticAnalysisModal}>{getTranslation('Cognate acoustic analysis')}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateMultiModal}>{getTranslation('Cognate multi-language reconstruction')}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateReconstructionModal}>{getTranslation('Cognate reconstruction')}</Dropdown.Item>
+          <Dropdown.Item onClick={openCognateSuggestionsModal}>{getTranslation('Cognate suggestions')}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonemicAnalysisModal}>{getTranslation('Phonemic analysis')}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologyModal}>{getTranslation('Phonology')}</Dropdown.Item>
+          <Dropdown.Item onClick={openPhonologicalStatisticalDistanceModal}>{getTranslation('Phonological statistical distance')}</Dropdown.Item>
+          <Dropdown.Item onClick={soundAndMarkup}>{getTranslation('Sound and markup')}</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
       <Menu.Menu position="right">
         <Filter filter={filter} submitFilter={submitFilter} />
-        <DropdownFilter filter={filter} submitFilter={submitFilter} ></DropdownFilter>
       </Menu.Menu>
     </Menu>
   );
@@ -369,7 +327,7 @@ class Perspective extends React.Component {
         component: Merge,
       }
     });
-  
+
     return (
       <Container fluid className="perspective inverted">
         <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />
@@ -407,8 +365,7 @@ class Perspective extends React.Component {
       </Container>
     );
   }
-
-};
+}
 
 Perspective.propTypes = {
   perspective: PropTypes.object.isRequired,

@@ -128,9 +128,9 @@ const downloadDictionariesMutation = gql`
   }
 `;
 const AuthWrapper = ({
-  data: {
-    perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
-  },
+
+  perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
+
 }) => {
   const Component = compose(
     connect(
@@ -163,14 +163,8 @@ const AuthWrapper = ({
 };
 
 
-
 const Home = (props) => {
   const {
-    grantsMode,
-    selected,
-    actions,
-    downloadDictionaries,
-   
     perspectives,
     grants,
     languages,
@@ -180,7 +174,7 @@ const Home = (props) => {
     },
     location: { hash },
   } = props;
-  
+
 
   if (error) {
     return null;
@@ -188,37 +182,37 @@ const Home = (props) => {
 
   if (loading) {
     return (
-      <Placeholder/>
+      <Placeholder />
     );
   }
-  let localDictionaries=[];
-    const languagesTree = buildLanguageTree(fromJS(languages));
-    const dictsSource = fromJS(dictionaries);
-    const localDicts = fromJS(localDictionaries);
-    const grantsList = fromJS(grants);
-    const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
-    const hasPermission = (p, permission) =>
-      (config.buildType === 'server' ? false : permissions.get(permission).has(p.get('id')));
-  
-    const dicts = dictsSource.reduce(
-      (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
-      new Map()
-    );
-    const perspectivesList = fromJS(perspectives).map(perspective =>
+  const localDictionaries = [];
+  const languagesTree = buildLanguageTree(fromJS(languages));
+  const dictsSource = fromJS(dictionaries);
+  const localDicts = fromJS(localDictionaries);
+  const grantsList = fromJS(grants);
+  const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
+  const hasPermission = (p, permission) =>
+    (config.buildType === 'server' ? false : permissions.get(permission).has(p.get('id')));
 
-      fromJS({
-        ...perspective.toJS(),
-        view: hasPermission(perspective, 'view'),
-        edit: hasPermission(perspective, 'edit'),
-        publish: hasPermission(perspective, 'publish'),
-        limited: hasPermission(perspective, 'limited'),
-      }));
-  
+  const dicts = dictsSource.reduce(
+    (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
+    new Map()
+  );
+  const perspectivesList = fromJS(perspectives).map(perspective =>
+
+    fromJS({
+      ...perspective.toJS(),
+      view: hasPermission(perspective, 'view'),
+      edit: hasPermission(perspective, 'edit'),
+      publish: hasPermission(perspective, 'publish'),
+      limited: hasPermission(perspective, 'limited'),
+    }));
+
   return (
 
     <Container className="published">
       <Segment>
-           <GrantedDicts
+        <GrantedDicts
           languagesTree={languagesTree}
           dictionaries={dicts}
           perspectives={perspectivesList}
@@ -227,10 +221,9 @@ const Home = (props) => {
         />
       </Segment>
     </Container>
-  )
-}
+  );
+};
 
 
 export default compose(
-  graphql(dictionaryWithPerspectivesQuery), graphql(dictionaryWithPerspectivesProxyQuery)
-)(AuthWrapper);
+  graphql(dictionaryWithPerspectivesQuery), graphql(dictionaryWithPerspectivesProxyQuery))(AuthWrapper);

@@ -1,14 +1,10 @@
-
-
 import React, { Component } from 'react';
 
-const EditorConvertToHTML=()=>{
-  return(
-    <div>
+const EditorConvertToHTML = () => (
+  <div>
       werwr
-    </div>
-  )
-}
+  </div>
+);
 
 /* import { EditorState, convertToRaw } from 'draft-js'; */
 /* import { Editor } from 'react-draft-wysiwyg'; */
@@ -54,7 +50,6 @@ class EditorConvertToHTML extends Component {
           </div>
 
 
-
         </div>
 
         <Button color="green" className="button-send">{getTranslation("Add news")}</Button>
@@ -62,4 +57,4 @@ class EditorConvertToHTML extends Component {
     );
   }
 } */
-export default EditorConvertToHTML
+export default EditorConvertToHTML;

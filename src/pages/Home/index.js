@@ -8,12 +8,9 @@ import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 import Immutable, { fromJS, Map } from 'immutable';
 import { Container, Form, Radio, Segment, Button, Label } from 'semantic-ui-react';
-
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
-import { setGrantsMode, setLanguagesMode,setDictionariesMode, resetDictionaries } from 'ducks/home';
-
+import { setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries } from 'ducks/home';
 import config from 'config';
-
 import BackTopButton from 'components/BackTopButton';
 import { getTranslation } from 'api/i18n';
 import Placeholder from 'components/Placeholder';
@@ -21,7 +18,6 @@ import GrantedDicts from './components/GrantedDicts';
 import AllDicts from './components/AllDicts';
 import { getScrollContainer } from './common';
 import './published.scss';
-
 
 
 const authenticatedDictionariesQuery = gql`
@@ -171,10 +167,9 @@ const Home = (props) => {
       }).map(ps => new Immutable.Set(ps.map(p => p.get('id'))));
 
   const dictsSource = fromJS(dictionaries);
- 
+
   // pre-process dictionary list
   const localDicts = fromJS(localDictionaries);
-  console.log(localDicts,'localDicts')
   const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
   const hasPermission = (p, permission) =>
     (config.buildType === 'server' ? false : permissions.get(permission).has(p.get('id')));
@@ -183,7 +178,7 @@ const Home = (props) => {
     (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
     new Map()
   );
-  
+
   const perspectivesList = fromJS(perspectives).map(perspective =>
     // for every perspective set 4 boolean property: edit, view, publish, limited
     // according to permission_list result
@@ -215,18 +210,18 @@ const Home = (props) => {
               <Form.Field
                 control={Radio}
                 label={{ children: <div className="toggle-label">{getTranslation('By Languages')}</div> }}
-                value='languagesMode'
-                checked={selectMode === "languagesMode"}
-                onChange={() => actions.setLanguagesMode("languagesMode")}
+                value="languagesMode"
+                checked={selectMode === 'languagesMode'}
+                onChange={() => actions.setLanguagesMode('languagesMode')}
               />
               <Form.Field
                 control={Radio}
                 label={{ children: <div className="toggle-label">{getTranslation('By Grants')}</div> }}
-                value='grantsMode'
-                checked={selectMode === "grantsMode"}
-                onChange={() => actions.setGrantsMode("grantsMode")}
+                value="grantsMode"
+                checked={selectMode === 'grantsMode'}
+                onChange={() => actions.setGrantsMode('grantsMode')}
               />
-           
+
             </Segment>
           </Form.Group>
         </Form>
@@ -240,7 +235,7 @@ const Home = (props) => {
           )}
       </Segment>
       <Segment>
-        {selectMode === "languagesMode"  && (
+        {selectMode === 'languagesMode' && (
           <AllDicts
             location={props.location}
             languagesTree={languagesTree}
@@ -248,10 +243,10 @@ const Home = (props) => {
             perspectives={perspectivesList}
             isAuthenticated={isAuthenticated}
             dictsSource={dictsSource}
-           
+
           />
         )}
-        {selectMode === "grantsMode"  && (
+        {selectMode === 'grantsMode' && (
           <GrantedDicts
             location={props.location}
             languagesTree={languagesTree}
@@ -277,12 +272,12 @@ Home.propTypes = {
   grants: PropTypes.array.isRequired,
   languages: PropTypes.array.isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
-  selectMode: PropTypes.string,
+  selectMode: PropTypes.string.isRequired,
   selected: PropTypes.instanceOf(Immutable.Set).isRequired,
   actions: PropTypes.shape({
     setGrantsMode: PropTypes.func.isRequired,
     setLanguagesMode: PropTypes.func,
-    setDictionariesMode:PropTypes.func,
+    setDictionariesMode: PropTypes.func,
     resetDictionaries: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.object.isRequired,
@@ -363,11 +358,14 @@ const AuthWrapper = ({
     perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
   },
 }) => {
-
   const Component = compose(
     connect(
       state => ({ ...state.home, ...state.router }),
-      dispatch => ({ actions: bindActionCreators({ setGrantsMode, setLanguagesMode, setDictionariesMode,resetDictionaries }, dispatch) })
+      dispatch => ({
+        actions: bindActionCreators({
+          setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries
+        }, dispatch)
+      })
     ),
     graphql(isAuthenticated ? authenticatedDictionariesQuery : guestDictionariesQuery, {
       options: {
@@ -381,7 +379,7 @@ const AuthWrapper = ({
       <Component perspectives={perspectives} grants={grants} languages={languages} isAuthenticated={isAuthenticated} />
     );
   }
- 
+
   // proxy and desktop has additional parameter - local dictionaries
   return (
     <Component

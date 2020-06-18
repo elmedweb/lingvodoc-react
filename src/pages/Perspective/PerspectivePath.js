@@ -50,7 +50,7 @@ class PerspectivePath extends React.Component {
     this.getCommonTreeSection = this.getCommonTreeSection.bind(this);
   }
 
-  getCommonTreeSection({ treeElement }) {
+  getCommonTreeSection=({ treeElement }) => {
     const section = {
       key: null,
       content: null
@@ -65,9 +65,9 @@ class PerspectivePath extends React.Component {
     return section;
   }
 
-  getPerspectiveTreeSection({
+  getPerspectiveTreeSection=({
     treeElement, perspectives, mode, dictionary_id, tree, id, actions
-  }) {
+  }) => {
     const section = {
       key: null,
       content: null
@@ -75,35 +75,36 @@ class PerspectivePath extends React.Component {
 
     section.key = treeElement.id;
     section.active = true;
-    section.content = <Dropdown inline text={treeElement.translation}>
-      <Dropdown.Menu>
-        {perspectives.filter(perspective => perspective.id != tree[0].id).map(perspective => (
+    section.content =
+      <Dropdown inline text={treeElement.translation}>
+        <Dropdown.Menu>
+          {perspectives.filter(perspective => perspective.id !== tree[0].id).map(perspective => (
+            <Dropdown.Item
+              as="a"
+              key={perspective.id}
+              href={`${window.location.protocol}//${window.location.host}/dictionary/${perspective.parent_id.join('/')}/perspective/${perspective.id.join('/')}/${mode}`}
+              icon="chevron right"
+              text={perspective.translation}
+            />))
+          }
+          <Dropdown.Divider />
           <Dropdown.Item
-            as="a"
-            key={perspective.id}
-            href={`${window.location.protocol}//${window.location.host}/dictionary/${perspective.parent_id.join('/')}/perspective/${perspective.id.join('/')}/${mode}`}
-            icon="chevron right"
-            text={perspective.translation}
-          />))
-        }
-        <Dropdown.Divider />
-        <Dropdown.Item
-          icon="users"
-          text={getTranslation(`'${treeElement.translation}' roles...`)}
-          onClick={() => actions.openRoles(id, 'perspective')}
-        />
-        <Dropdown.Item
-          icon="setting"
-          text={getTranslation(`'${treeElement.translation}' properties...`)}
-          onClick={() => actions.openPerspectivePropertiesModal(id, dictionary_id)}
-        />
-        <Dropdown.Item
-          icon="percent"
-          text={getTranslation(`'${treeElement.translation}' statistics...`)}
-          onClick={() => actions.openStatistics(id, 'perspective')}
-        />
-      </Dropdown.Menu>
-    </Dropdown>;
+            icon="users"
+            text={getTranslation(`'${treeElement.translation}' roles...`)}
+            onClick={() => actions.openRoles(id, 'perspective')}
+          />
+          <Dropdown.Item
+            icon="setting"
+            text={getTranslation(`'${treeElement.translation}' properties...`)}
+            onClick={() => actions.openPerspectivePropertiesModal(id, dictionary_id)}
+          />
+          <Dropdown.Item
+            icon="percent"
+            text={getTranslation(`'${treeElement.translation}' statistics...`)}
+            onClick={() => actions.openStatistics(id, 'perspective')}
+          />
+        </Dropdown.Menu>
+      </Dropdown>;
 
     return section;
   }
@@ -122,7 +123,7 @@ class PerspectivePath extends React.Component {
     const { perspectives } = queryAvailablePerspectives.dictionary;
 
     const sections = tree.slice().reverse().map((e, index) => {
-      if (perspectives.length > 1 && index == tree.length - 1) {
+      if (perspectives.length > 1 && index === tree.length - 1) {
         return this.getPerspectiveTreeSection({
           treeElement: e, perspectives, mode, dictionary_id, tree, id, actions
         });

@@ -63,9 +63,9 @@ const Routes = () => (
     <Route path="/supportRoute" component={SupportRoute} />
     <Route path="/no_grants" component={NoGrants} />
     <Route path="/corpora_all" component={CorporaAll} />
-    <Route path="/news_editor" component={NewsEditor}/>
-    <Route path="/news_list" component={NewsList}/>
-    <Route path="/news/:news_one" component={News}/>
+    <Route path="/news_editor" component={NewsEditor} />
+    <Route path="/news_list" component={NewsList} />
+    <Route path="/news/:news_one" component={News} />
     <Route component={NotFound} />
 
   </Switch>

@@ -1,12 +1,12 @@
 import React from 'react';
+import PropTypes, { object } from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
-import { fromJS, Map } from 'immutable';
+import Immutable, { fromJS, Map } from 'immutable';
 import { Container, Segment } from 'semantic-ui-react';
-
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
 import { setGrantsMode, resetDictionaries } from 'ducks/home';
 import Placeholder from 'components/Placeholder';
@@ -119,7 +119,46 @@ const dictionaryWithPerspectivesProxyQuery = gql`
     is_authenticated
   }
 `;
-
+const authenticatedDictionariesQuery = gql`
+  query AuthDictionaries {
+    dictionaries(proxy: true) {
+      id
+      parent_id
+      translation
+      status
+      category
+      additional_metadata {
+        authors
+      }
+      perspectives {
+        id
+        translation
+      }
+    }
+    permission_lists(proxy: true) {
+      view {
+        id
+        parent_id
+        translation
+      }
+      edit {
+        id
+        parent_id
+        translation
+      }
+      publish {
+        id
+        parent_id
+        translation
+      }
+      limited {
+        id
+        parent_id
+        translation
+      }
+    }
+  }
+`;
 const downloadDictionariesMutation = gql`
   mutation DownloadDictionaries($ids: [LingvodocID]!) {
     download_dictionaries(ids: $ids) {
@@ -127,40 +166,6 @@ const downloadDictionariesMutation = gql`
     }
   }
 `;
-const AuthWrapper = ({
-
-  perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
-
-}) => {
-  const Component = compose(
-    connect(
-      state => ({ ...state.home, ...state.router }),
-      dispatch => ({ actions: bindActionCreators({ setGrantsMode, resetDictionaries }, dispatch) })
-    ),
-    graphql(isAuthenticated ? authenticatedDictionariesQuery : guestDictionariesQuery, {
-      options: {
-        fetchPolicy: 'network-only'
-      }
-    }),
-    graphql(downloadDictionariesMutation, { name: 'downloadDictionaries' })
-  )(Home);
-
-  if (config.buildType === 'server') {
-    return (
-      <Component perspectives={perspectives} grants={grants} languages={languages} isAuthenticated={isAuthenticated} />
-    );
-  }
-  // proxy and desktop has additional parameter - local dictionaries
-  return (
-    <Component
-      dictionaries={dictionaries}
-      perspectives={perspectives}
-      grants={grants}
-      languages={languages}
-      isAuthenticated={isAuthenticated}
-    />
-  );
-};
 
 
 const Home = (props) => {
@@ -185,6 +190,15 @@ const Home = (props) => {
       <Placeholder />
     );
   }
+  const permissions =
+    config.buildType === 'server'
+      ? null
+      : fromJS({
+        view: permissionLists.view,
+        edit: permissionLists.edit,
+        publish: permissionLists.publish,
+        limited: permissionLists.limited,
+      }).map(ps => new Immutable.Set(ps.map(p => p.get('id'))));
   const localDictionaries = [];
   const languagesTree = buildLanguageTree(fromJS(languages));
   const dictsSource = fromJS(dictionaries);
@@ -224,6 +238,56 @@ const Home = (props) => {
   );
 };
 
+const AuthWrapper = ({
+  data: {
+    perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
+  },
+}) => {
+  const Component = compose(
+    connect(
+      state => ({ ...state.home, ...state.router }),
+      dispatch => ({ actions: bindActionCreators({ setGrantsMode, resetDictionaries }, dispatch) })
+    ),
+    graphql(isAuthenticated ? authenticatedDictionariesQuery : guestDictionariesQuery, {
+      options: {
+        fetchPolicy: 'network-only'
+      }
+    }),
+    graphql(downloadDictionariesMutation, { name: 'downloadDictionaries' })
+  )(Home);
 
-export default compose(
-  graphql(dictionaryWithPerspectivesQuery), graphql(dictionaryWithPerspectivesProxyQuery))(AuthWrapper);
+  if (config.buildType === 'server') {
+    return (
+      <Component perspectives={perspectives} grants={grants} languages={languages} isAuthenticated={isAuthenticated} />
+    );
+  }
+  // proxy and desktop has additional parameter - local dictionaries
+  return (
+    <Component
+      dictionaries={dictionaries}
+      perspectives={perspectives}
+      grants={grants}
+      languages={languages}
+      isAuthenticated={isAuthenticated}
+    />
+  );
+};
+
+AuthWrapper.propTypes = {
+  data: PropTypes.shape({
+    perspectives: PropTypes.array,
+    grants: PropTypes.array,
+    language_tree: PropTypes.array,
+    is_authenticated: PropTypes.bool,
+  }).isRequired,
+};
+
+Home.propTypes = {
+  perspectives: PropTypes.array.isRequired,
+  grants: PropTypes.array.isRequired,
+  languages: PropTypes.array.isRequired,
+  isAuthenticated: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired
+};
+export default compose(graphql(dictionaryWithPerspectivesQuery), graphql(dictionaryWithPerspectivesProxyQuery))(AuthWrapper);

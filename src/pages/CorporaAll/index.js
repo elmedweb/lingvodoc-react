@@ -138,7 +138,7 @@ const Home = (props) => {
 
   if (loading) {
     return (
-      <Placeholder/>
+      <Placeholder />
     );
   }
 

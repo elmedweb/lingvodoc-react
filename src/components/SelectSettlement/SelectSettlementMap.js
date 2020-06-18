@@ -10,158 +10,164 @@ import 'leaflet-geosearch/assets/css/leaflet.css';
 import './SelectSettlementMapStyle.scss';
 
 // Moscow
-const INIT_MAP_COORDINATES = [ 55.751571644791326, 37.617981433868415 ];
+const INIT_MAP_COORDINATES = [55.751571644791326, 37.617981433868415];
 const INIT_MAP_SCALE = 4;
 
 class SelectSettlementMap extends React.Component {
-  constructor ( props ) {
-    super( props );
+  constructor(props) {
+    super(props);
 
     this.marker = null;
     this.map = null;
     this.geoSearchInput = null;
     this.markerText = null;
   }
+  componentDidMount() {
+    this.map = this.createMap(this.selectSettlementMapWrapper);
 
-  _createReference ( name, element ) {
-    this[ name ] = element;
+    const provider = this.createProvider();
+    const tileLayer = this.createTileLayer();
+    const geoSearchControl = this.createGeoSearchControl(provider);
+
+    tileLayer.addTo(this.map);
+    geoSearchControl.addTo(this.map);
+
+    this.geoSearchInput = this.getGeoSearchInput();
+
+    this.map.on('click', this.clickOnMapHandler.bind(this, provider));
+    this.map.on('geosearch/showlocation', this.geoSearchHandler.bind(this));
   }
 
-  _createMap ( wrapper ) {
-    const map = L.map( wrapper ).setView( INIT_MAP_COORDINATES, INIT_MAP_SCALE );
+  getGeoSearchInput = () => {
+    const geoSearchInput = document.querySelector('.glass');
 
-    return map;
-  }
-
-  _createTileLayer () {
-    const tileLayer = L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-      {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      }
-    );
-    
-    return tileLayer;
-  }
-
-  _createMarker ( coordinates ) {
-    const icon = this._createMarkerIcon();
-    const marker = L.marker( coordinates, { icon });
-
-    return marker;
-  }
-
-  _createMarkerIcon () {
-    const icon = L.divIcon({
-      className: 'map-marker marker-color-gray',
-      iconSize:  [ 28, 28 ]
-    });
-
-    return icon;
-  }
-
-  _createProvider () {
-    const provider = new OpenStreetMapProvider();
-
-    return provider;
-  }
-
-  _createGeoSearchControl ( provider ) {
-    const geoSearchControl = new GeoSearchControl({
-      provider,
-      searchLabel: getTranslation( 'Type to search' ),
-      autoClose: true,
-      style: 'bar',
-      marker: {
-        draggable: false,
-        icon: this._createMarkerIcon()
-      }
-    });
-
-    return geoSearchControl;
-  }
-
-  _getGeoSearchInput () {
-    const geoSearchInput = document.querySelector( '.glass' );
-
-    geoSearchInput.addEventListener( 'click', ( event ) => {
+    geoSearchInput.addEventListener('click', (event) => {
       event.stopPropagation();
     });
 
     return geoSearchInput;
   }
 
-  _clickOnMapHandler ( provider, event ) {
-    const coordinates = [ event.latlng.lat, event.latlng.lng ];
 
-    if ( !this.marker ) {
-      this.marker = this._createMarker( coordinates ).addTo( this.map );
+  createProvider = () => {
+    const provider = new OpenStreetMapProvider();
+
+    return provider;
+  }
+
+  createGeoSearchControl = (provider) => {
+    const geoSearchControl = new GeoSearchControl({
+      provider,
+      searchLabel: getTranslation('Type to search'),
+      autoClose: true,
+      style: 'bar',
+      marker: {
+        draggable: false,
+        icon: this.createMarkerIcon()
+      }
+    });
+
+    return geoSearchControl;
+  }
+
+
+  createMarkerIcon = () => {
+    const icon = L.divIcon({
+      className: 'map-marker marker-color-gray',
+      iconSize: [28, 28]
+    });
+
+    return icon;
+  }
+
+  createTileLayer = () => {
+    const tileLayer = L.tileLayer(
+      'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+      {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      }
+    );
+
+    return tileLayer;
+  }
+
+  createMarker = (coordinates) => {
+    const icon = this.createMarkerIcon();
+    const marker = L.marker(coordinates, { icon });
+
+    return marker;
+  }
+
+  createMap = (wrapper) => {
+    const map = L.map(wrapper).setView(INIT_MAP_COORDINATES, INIT_MAP_SCALE);
+
+    return map;
+  }
+
+  createReference = (name, element) => {
+    this[name] = element;
+  }
+
+  clickOnMapHandler = (provider, event) => {
+    const coordinates = [event.latlng.lat, event.latlng.lng];
+
+    if (!this.marker) {
+      this.marker = this.createMarker(coordinates).addTo(this.map);
     } else {
-      this.marker.setLatLng( coordinates );
+      this.marker.setLatLng(coordinates);
     }
 
-    provider.search({ query: coordinates }).then( ( result ) => {
-      const label = result[ 0 ].label;
+    provider.search({ query: coordinates }).then((result) => {
+      const { label } = result[0].label;
 
       this.markerText = label;
       this.geoSearchInput.value = label;
-      this.marker.bindPopup( label ).openPopup();
+      this.marker.bindPopup(label).openPopup();
     });
   }
 
-  _geoSearchHandler ( event ) {
-    const label = event.location.label;
-    const coordinates = [ Number( event.location.y ), Number( event.location.x ) ];
+  geoSearchHandler = (event) => {
+    const { label } = event.location.label;
+    const coordinates = [Number(event.location.y), Number(event.location.x)];
 
-    if ( !this.marker ) {
-      this.marker = this._createMarker( coordinates ).addTo( this.map );
+    if (!this.marker) {
+      this.marker = this.createMarker(coordinates).addTo(this.map);
     } else {
-      this.marker.setLatLng( coordinates );
+      this.marker.setLatLng(coordinates);
     }
 
     this.markerText = label;
-    this.marker.bindPopup( label ).openPopup();
+    this.marker.bindPopup(label).openPopup();
   }
 
-  componentDidMount () {
-    this.map = this._createMap( this.selectSettlementMapWrapper );
 
-    const provider = this._createProvider();
-    const tileLayer = this._createTileLayer();
-    const geoSearchControl = this._createGeoSearchControl( provider );
-
-    tileLayer.addTo( this.map );
-    geoSearchControl.addTo( this.map );
-
-    this.geoSearchInput = this._getGeoSearchInput();
-
-    this.map.on( 'click', this._clickOnMapHandler.bind( this, provider ) );
-    this.map.on( 'geosearch/showlocation', this._geoSearchHandler.bind( this ) );
+  selected() {
+    this.props.callback(this.markerText);
   }
 
-  selected () {
-    this.props.callback( this.markerText );
-  }
-
-  render () {
+  render() {
     return (
       <div>
         <div
-          ref={ this._createReference.bind( this, 'selectSettlementMapWrapper' ) }
-          className = "select-settlement-map"
-        >
-        </div>
-        <br/>
-        <Button onClick = { () => {
-          this.selected()
-          this.props.closeModal()
-        }}>{ getTranslation( 'Select' ) }</Button>
-        <Button onClick = { () => {
-          this.props.closeModal()
-        }}>{ getTranslation( 'Close' ) }</Button>
+          ref={this.createReference.bind(this, 'selectSettlementMapWrapper')}
+          className="select-settlement-map"
+        />
+        <br />
+        <Button onClick={() => {
+          this.selected();
+          this.props.closeModal();
+        }}
+        >{getTranslation('Select')}
+        </Button>
+        <Button onClick={() => {
+          this.props.closeModal();
+        }}
+        >{getTranslation('Close')}
+        </Button>
       </div>
-    )
+    );
   }
-};
+}
 
 SelectSettlementMap.propTypes = {
   closeModal: PropTypes.func.isRequired,

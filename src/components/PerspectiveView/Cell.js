@@ -1,11 +1,10 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { pure, onlyUpdateForKeys, compose } from 'recompose';
+import { onlyUpdateForKeys, compose } from 'recompose';
 import { Table, Popup } from 'semantic-ui-react';
 import Entities from 'components/LexicalEntry';
 import 'styles/main.scss';
-import { graphql, withApollo } from 'react-apollo';
+import { withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 
 
@@ -21,47 +20,46 @@ query author($perspectiveId:LingvodocID!) {
   }
 }
 `;
-let authors = [];
+
 let str = null;
-let last_modified_at = null;
 let date = null;
-let BeautifulDate = (timestamp) => {
-  let check = (number) => {
+
+const BeautifulDate = (timestamp) => {
+  const check = (number) => {
     if (number <= 9) {
-      return '0' + number
-    } else {
-      return number
+      return `0${number}`;
     }
-  }
-  return check(timestamp.getDate()) + '.' + check(timestamp.getMonth()) + '.' + timestamp.getFullYear();
-}
-let PanelAuthors = (props) => {
-
-  props.props.client.query({
+    return number;
+  };
+  return `${check(timestamp.getDate())}.${check(timestamp.getMonth())}.${timestamp.getFullYear()}`;
+};
+const PanelAuthors = (props) => {
+  props.content.client.query({
     query: AutorsName,
-    variables: { perspectiveId: props.props.perspectiveId },
+    variables: { perspectiveId: props.content.perspectiveId },
 
-  }).then(result => {
-    authors = result.data.perspective.authors;
-    last_modified_at = result.data.perspective.last_modified_at;
-    date = new Date(Math.trunc(last_modified_at) * 1000)
-    str = authors.map(name => name.name + ' ') + BeautifulDate(date);
-
+  }).then((result) => {
+    const { authors } = result.data.perspective.authors;
+    const { lastModifiedAt } = result.data.perspective.last_modified_at;
+    date = new Date(Math.trunc(lastModifiedAt) * 1000);
+    str = authors.map(name => `${name.name} `) + BeautifulDate(date);
   });
   return (
     <div>{str}</div>
-  )
-}
-
+  );
+};
 
 
 function Cell(props) {
-  const { perspectiveId, entry, column, columns, mode, entitiesMode } = props;
+  const {
+    perspectiveId, entry, column, columns, mode, entitiesMode
+  } = props;
 
 
   return (
 
-    <Popup content={<PanelAuthors props={props}></PanelAuthors>}
+    <Popup
+      content={<PanelAuthors content={props} />}
       trigger={
         <Table.Cell className="entity gentium">
           <Entities
@@ -73,11 +71,12 @@ function Cell(props) {
             entitiesMode={entitiesMode}
           />
         </Table.Cell>
-      }>
-
-
-    </Popup>
+      }
+    />
   );
+}
+PanelAuthors.propTypes = {
+  content: PropTypes.object.isRequired,
 };
 
 Cell.propTypes = {

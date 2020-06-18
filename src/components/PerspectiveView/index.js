@@ -45,7 +45,7 @@ export const queryPerspective = gql`
     }
   }
 `;
-//console alex
+
 export const queryLexicalEntries = gql`
   query queryPerspective2($id: LingvodocID!, $entitiesMode: String!) {
     perspective(id: $id) {

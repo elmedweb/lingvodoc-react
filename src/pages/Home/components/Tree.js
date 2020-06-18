@@ -138,8 +138,8 @@ class Tree extends React.Component {
 
   componentDidMount() {
     if (this.props.location) {
-      let query = new URLSearchParams(this.props.location.search);
-      let anchor = query.get('anchor');
+      const query = new URLSearchParams(this.props.location.search);
+      const anchor = query.get('anchor');
 
       if (anchor) {
         const id = anchor.split(',');
@@ -150,7 +150,6 @@ class Tree extends React.Component {
         }
       }
     }
-
   }
 
   render() {
@@ -167,6 +166,7 @@ class Tree extends React.Component {
 Tree.propTypes = {
   tree: PropTypes.instanceOf(Immutable.List).isRequired,
   canSelectDictionaries: PropTypes.bool,
+  location: PropTypes.object.isRequired,
 };
 
 Tree.defaultProps = {

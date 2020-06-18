@@ -155,10 +155,10 @@ class CreateDictionaryWizard extends React.Component {
               <Divider />
               <Header inverted>{getTranslation('Fill metadata information')}</Header>
               {mode === 'dictionary' && (
-                <EditDictionaryMetadata mode='create' metadata={metadata ? metadata.toJS() : metadata} onChange={metadata => this.props.setMetadata(metadata)} />
+                <EditDictionaryMetadata mode="create" metadata={metadata ? metadata.toJS() : metadata} onChange={event => this.props.setMetadata(event)} />
               )}
               {mode === 'corpus' && (
-                <EditCorpusMetadata mode='create' metadata={metadata ? metadata.toJS() : metadata} onChange={metadata => this.props.setMetadata(metadata)} />
+                <EditCorpusMetadata mode="create" metadata={metadata ? metadata.toJS() : metadata} onChange={event => this.props.setMetadata(event)} />
               )}
               {}
             </div>

@@ -42,28 +42,26 @@ function selected(state = new Immutable.Set(), { type, payload }) {
 }
 
 
-function selectMode(state = "languagesMode", { type, payload }) {
-    switch (type) {
-      case TOGGLE_GRANTS_MODE:
-        return !state;
-      case SET_LANGUAGES_MODE:
-        return payload;
-      case SET_GRANTS_MODE:
-        return payload;
-      case SET_DICTIONARIES_MODE:
-        return payload;
-      case LOCATION_CHANGE:
-        if (payload.pathname === config.homePath) {
-          const params = new URLSearchParams(payload.search);
-          const mode = params.get('mode');
-          return mode ? mode !== 'dicts' : state;
-        }
-        return state;
-      default:
-        return state;
-    }
-  
-
+function selectMode(state = 'languagesMode', { type, payload }) {
+  switch (type) {
+    case TOGGLE_GRANTS_MODE:
+      return !state;
+    case SET_LANGUAGES_MODE:
+      return payload;
+    case SET_GRANTS_MODE:
+      return payload;
+    case SET_DICTIONARIES_MODE:
+      return payload;
+    case LOCATION_CHANGE:
+      if (payload.pathname === config.homePath) {
+        const params = new URLSearchParams(payload.search);
+        const mode = params.get('mode');
+        return mode ? mode !== 'dicts' : state;
+      }
+      return state;
+    default:
+      return state;
+  }
 }
 
 

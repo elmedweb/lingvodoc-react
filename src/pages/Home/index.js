@@ -10,7 +10,7 @@ import Immutable, { fromJS, Map } from 'immutable';
 import { Container, Form, Radio, Segment, Button } from 'semantic-ui-react';
 
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
-import { setGrantsMode, setLanguagesMode,setDictionariesMode, resetDictionaries } from 'ducks/home';
+import {setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode } from 'ducks/home';
 
 import config from 'config';
 
@@ -18,16 +18,20 @@ import BackTopButton from 'components/BackTopButton';
 import GrantedDicts from './components/GrantedDicts';
 import AllDicts from './components/AllDicts';
 import Placeholder from 'components/Placeholder';
+import DateModifDict from './components/DateModifDict';
+import DateCreateDict from './components/DateCreateDict';
+import AuthorsMode from './components/AuthorsMode';
+import MetaTagsDict from './components/MetaTagsDict';
 import { getScrollContainer } from './common';
 import { getTranslation } from 'api/i18n';
 import './published.scss';
-
 
 
 const authenticatedDictionariesQuery = gql`
   query AuthDictionaries {
     dictionaries(proxy: true) {
       id
+      created_at
       parent_id
       translation
       status
@@ -69,6 +73,7 @@ const guestDictionariesQuery = gql`
   query GuestDictionaries {
     dictionaries(proxy: false, published: true) {
       id
+      created_at
       parent_id
       last_modified_at
       translation
@@ -157,6 +162,7 @@ const Home = (props) => {
     }
   }
 
+
   const grantsList = fromJS(grants);
   const languagesTree = buildLanguageTree(fromJS(languages));
 
@@ -172,7 +178,7 @@ const Home = (props) => {
       }).map(ps => new Immutable.Set(ps.map(p => p.get('id'))));
 
   const dictsSource = fromJS(dictionaries);
- 
+
   // pre-process dictionary list
   const localDicts = fromJS(localDictionaries);
   const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
@@ -183,7 +189,7 @@ const Home = (props) => {
     (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
     new Map()
   );
-  
+
   const perspectivesList = fromJS(perspectives).map(perspective =>
     // for every perspective set 4 boolean property: edit, view, publish, limited
     // according to permission_list result
@@ -213,20 +219,50 @@ const Home = (props) => {
             <label>{getTranslation('Display mode')}</label>
             <Segment>
               <Form.Field
+                className="checkbox_radio"
                 control={Radio}
-                label={{ children: <div className="toggle-label">{getTranslation('By Languages')}</div> }}
-                value='languagesMode'
-                checked={selectMode === "languagesMode"}
-                onChange={() => actions.setLanguagesMode("languagesMode")}
+                label="By Modification date"
+                value="modifDateMode"
+                checked={selectMode === 'modifDateMode'}
+                onChange={() => actions.setModifDateMode('modifDateMode')}
+              />
+              <Form.Field
+                className="checkbox_radio"
+                control={Radio}
+                label="By Create date"
+                value="createDateMode"
+                checked={selectMode === 'createDateMode'}
+                onChange={() => actions.setCreateDateMode('createDateMode')}
               />
               <Form.Field
                 control={Radio}
-                label={{ children: <div className="toggle-label">{getTranslation('By Grants')}</div> }}
-                value='grantsMode'
-                checked={selectMode === "grantsMode"}
-                onChange={() => actions.setGrantsMode("grantsMode")}
+                label={{ children: <div className="toggle-label">{getTranslation('By Languages')}</div> }}
+                value="languagesMode"
+                checked={selectMode === 'languagesMode'}
+                onChange={() => actions.setLanguagesMode('languagesMode')}
               />
-           
+
+              <Form.Field
+                control={Radio}
+                label={{ children: <div className="toggle-label">{getTranslation('By Grants')}</div> }}
+                value="grantsMode"
+                checked={selectMode === 'grantsMode'}
+                onChange={() => actions.setGrantsMode('grantsMode')}
+              />
+              <Form.Field
+                control={Radio}
+                label={{ children: <div className="toggle-label">{getTranslation('By Authors')}</div> }}
+                value="authorsMode"
+                checked={selectMode === 'authorsMode'}
+                onChange={() => actions.setAuthorsMode('authorsMode')}
+              />
+              <Form.Field
+                control={Radio}
+                label={{ children: <div className="toggle-label">{getTranslation('By Tags')}</div> }}
+                value="metaTagsMode"
+                checked={selectMode === 'metaTagsMode'}
+                onChange={() => actions.setMetaTagsMode('metaTagsMode')}
+              />
             </Segment>
           </Form.Group>
         </Form>
@@ -240,7 +276,7 @@ const Home = (props) => {
           )}
       </Segment>
       <Segment>
-        {selectMode === "languagesMode"  && (
+        {selectMode === 'languagesMode' && (
           <AllDicts
             location={props.location}
             languagesTree={languagesTree}
@@ -248,10 +284,10 @@ const Home = (props) => {
             perspectives={perspectivesList}
             isAuthenticated={isAuthenticated}
             dictsSource={dictsSource}
-           
+
           />
         )}
-        {selectMode === "grantsMode"  && (
+        {selectMode === 'grantsMode' && (
           <GrantedDicts
             location={props.location}
             languagesTree={languagesTree}
@@ -261,6 +297,45 @@ const Home = (props) => {
             isAuthenticated={isAuthenticated}
           />
         )}
+        {
+          selectMode === 'modifDateMode' && (
+            <DateModifDict
+              location={props.location}
+              languagesTree={languagesTree}
+              dictionaries={dicts}
+              perspectives={perspectivesList}
+              isAuthenticated={isAuthenticated}
+              dictsSource={dictsSource}
+            />
+          )
+        }
+        {selectMode === 'authorsMode' && (
+          <AuthorsMode
+            location={props.location}
+            languagesTree={languagesTree}
+            dictionaries={dicts}
+            perspectives={perspectivesList}
+            isAuthenticated={isAuthenticated}
+            dictsSource={dictsSource}
+          />)
+        }
+        {
+          selectMode === 'createDateMode' && (
+            <DateCreateDict
+              location={props.location}
+              languagesTree={languagesTree}
+              dictionaries={dicts}
+              perspectives={perspectivesList}
+              isAuthenticated={isAuthenticated}
+              dictsSource={dictsSource}
+            />
+          )
+        }
+        {
+          selectMode === 'metaTagsMode' && (
+            <MetaTagsDict />
+          )
+        }
 
       </Segment>
       <BackTopButton scrollContainer={scrollContainer} />
@@ -277,12 +352,12 @@ Home.propTypes = {
   grants: PropTypes.array.isRequired,
   languages: PropTypes.array.isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
-  selectMode: PropTypes.string,
+  selectMode: PropTypes.string.isRequired,
   selected: PropTypes.instanceOf(Immutable.Set).isRequired,
   actions: PropTypes.shape({
     setGrantsMode: PropTypes.func.isRequired,
     setLanguagesMode: PropTypes.func,
-    setDictionariesMode:PropTypes.func,
+    setDictionariesMode: PropTypes.func,
     resetDictionaries: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.object.isRequired,
@@ -323,6 +398,7 @@ const dictionaryWithPerspectivesProxyQuery = gql`
   query DictionaryWithPerspectivesProxy {
     dictionaries(proxy: false, published: true) {
       id
+      created_at
       parent_id
       translation
       last_modified_at
@@ -363,11 +439,14 @@ const AuthWrapper = ({
     perspectives, grants, language_tree: languages, is_authenticated: isAuthenticated, dictionaries,
   },
 }) => {
-
   const Component = compose(
     connect(
       state => ({ ...state.home, ...state.router }),
-      dispatch => ({ actions: bindActionCreators({ setGrantsMode, setLanguagesMode, setDictionariesMode,resetDictionaries }, dispatch) })
+      dispatch => ({
+        actions: bindActionCreators({
+          setMetaTagsMode,     setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode
+        }, dispatch)
+      })
     ),
     graphql(isAuthenticated ? authenticatedDictionariesQuery : guestDictionariesQuery, {
       options: {

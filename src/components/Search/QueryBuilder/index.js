@@ -288,6 +288,7 @@ class QueryBuilder extends React.Component {
   }
 
   onAdditionalFieldsChange(data) {
+    console.log(data)
     this.additionalFields = {
       ...this.additionalFields,
       ...data,
@@ -295,6 +296,7 @@ class QueryBuilder extends React.Component {
   }
 
   onSearchButtonClick() {
+
     const { searchId, actions } = this.props;
     const {
       languages: langsToFilter, dictionaries: dictsToFilter,
@@ -313,6 +315,7 @@ class QueryBuilder extends React.Component {
       humanSettlement,
       authors,
     };
+
     const query = this.addGrammaticalSigns(this.state.data.toJS());
 
     actions.setQuery(
@@ -357,7 +360,6 @@ class QueryBuilder extends React.Component {
     }
 
     const addGrammaticalSigns = [];
-
     grammaticalGroupNames.forEach((name) => {
       const values = Object.values(grammaticalSigns[name]);
 

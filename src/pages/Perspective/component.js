@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { graphql } from 'react-apollo';
+import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { map } from 'lodash';
 import { onlyUpdateForKeys, withHandlers, withState, compose } from 'recompose';
@@ -50,7 +50,20 @@ const toolsQuery = gql`
     }
   }
 `;
-
+const queryMetadata = gql`
+query metadata{
+  select_tags_metadata
+}`;
+const perspectiveAuthor = gql`
+query metadata($id: LingvodocID!) {
+  perspective(id:$id){
+    id
+  authors{
+    id
+    name
+  }
+  }
+}`;
 const Tools = graphql(toolsQuery)(({
   data,
   openCognateAnalysisModal,
@@ -58,8 +71,8 @@ const Tools = graphql(toolsQuery)(({
   openPhonologyModal,
   launchSoundAndMarkup,
   id,
-  mode }) =>
-{
+  mode
+}) => {
   if (data.loading || data.error) {
     return null;
   }
@@ -71,73 +84,80 @@ const Tools = graphql(toolsQuery)(({
     english_status == 'Limited access';
 
   return (
-    <Dropdown item text={getTranslation("Tools")}>
+    <Dropdown item text={getTranslation('Tools')}>
       <Dropdown.Menu>
 
         <Dropdown.Item
-          onClick={() => openCognateAnalysisModal(id, 'acoustic')}>
-          {getTranslation("Cognate acoustic analysis")}
+          onClick={() => openCognateAnalysisModal(id, 'acoustic')}
+        >
+          {getTranslation('Cognate acoustic analysis')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openCognateAnalysisModal(id)}>
-          {getTranslation("Cognate analysis")}
+          onClick={() => openCognateAnalysisModal(id)}
+        >
+          {getTranslation('Cognate analysis')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openCognateAnalysisModal(id, 'multi_reconstruction')}>
-          {getTranslation("Cognate multi-language reconstruction")}
+          onClick={() => openCognateAnalysisModal(id, 'multi_reconstruction')}
+        >
+          {getTranslation('Cognate multi-language reconstruction')}
         </Dropdown.Item>
 
         <Dropdown.Item
           onClick={() => openCognateAnalysisModal(id, 'multi_suggestions')}
-          disabled={!published}>
+          disabled={!published}
+        >
           {getTranslation(published ?
-            "Cognate multi-language suggestions" :
-            "Cognate multi-language suggestions (disabled, perspective is not published)")}
+            'Cognate multi-language suggestions' :
+            'Cognate multi-language suggestions (disabled, perspective is not published)')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openCognateAnalysisModal(id, 'reconstruction')}>
-          {getTranslation("Cognate reconstruction")}
+          onClick={() => openCognateAnalysisModal(id, 'reconstruction')}
+        >
+          {getTranslation('Cognate reconstruction')}
         </Dropdown.Item>
 
         <Dropdown.Item
           onClick={() => openCognateAnalysisModal(id, 'suggestions')}
-          disabled={!published}>
+          disabled={!published}
+        >
           {getTranslation(published ?
-            "Cognate suggestions" :
-            "Cognate suggestions (disabled, perspective is not published)")}
+            'Cognate suggestions' :
+            'Cognate suggestions (disabled, perspective is not published)')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openPhonemicAnalysisModal(id)}>
-          {getTranslation("Phonemic analysis")}
+          onClick={() => openPhonemicAnalysisModal(id)}
+        >
+          {getTranslation('Phonemic analysis')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openPhonologyModal(id)}>
-          {getTranslation("Phonology")}
+          onClick={() => openPhonologyModal(id)}
+        >
+          {getTranslation('Phonology')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => openPhonologyModal(id, 'statistical_distance')}>
-          {getTranslation("Phonological statistical distance")}
+          onClick={() => openPhonologyModal(id, 'statistical_distance')}
+        >
+          {getTranslation('Phonological statistical distance')}
         </Dropdown.Item>
 
         <Dropdown.Item
-          onClick={() => soundAndMarkup(id, mode, launchSoundAndMarkup)}>
-          {getTranslation("Sound and markup")}
+          onClick={() => soundAndMarkup(id, mode, launchSoundAndMarkup)}
+        >
+          {getTranslation('Sound and markup')}
         </Dropdown.Item>
 
       </Dropdown.Menu>
     </Dropdown>
   );
 });
-const options = [
-  { key: 'рука', text: 'рука', value: 'рука' },
 
-]
 const handlers = compose(
   withState('value', 'updateValue', props => props.filter),
   withHandlers({
@@ -169,7 +189,7 @@ const handlers1 = compose(
 const Filter = handlers(({ value, onChange, onSubmit }) => (
   <div className="ui right aligned category search item">
     <form className="ui transparent icon input" onSubmit={onSubmit}>
-      <input className="white" type="text" placeholder={getTranslation("Filter")} value={value} onChange={onChange} />
+      <input className="white" type="text" placeholder={getTranslation('Filter')} value={value} onChange={onChange} />
       <button type="submit" className="white">
         <i className="search link icon" />
       </button>
@@ -178,33 +198,36 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
 ));
 
 
+const DropdownFilter = handlers1(({
+  value, onChange, onSubmit, qwe
+}) => {
 
-const DropdownFilter = handlers1(({ value, onChange, onSubmit }) => 
-{
+
+  console.log(qwe)
   return (
-  <div className="ui right aligned category search item">
-    <form className="ui transparent icon input" onSubmit={onSubmit}>
-    <Dropdown placeholder='Skills' 
-    fluid
- 
-    search
-    selection
-/*     data={options}
-    value={value} */
-    options={options} 
-    onChange={onChange}
-    type="submit"/>
-      <button type="submit" className="white">
-        <i className="search link icon" />
-      </button>
-    </form>
-  </div>
+    <div className="ui right aligned category search item">
+      <form className="ui transparent icon input" onSubmit={onSubmit}>
+        <Dropdown
+          placeholder="Skills"
+          search
+          selection
+          /*  options={qwe} */
+          onChange={onChange}
+          type="submit"
+        />
+        <button type="submit" className="white">
+          <i className="search link icon" />
+        </button>
+      </form>
+    </div>
 
-)})
+  );
+});
 
 const ModeSelector = compose(
   connect(state => state.user),
-  onlyUpdateForKeys([ 'mode', 'baseUrl', 'filter', 'user' ])
+  onlyUpdateForKeys(['mode', 'baseUrl', 'filter', 'user']),
+  withApollo
 )(({
   mode,
   baseUrl,
@@ -215,8 +238,11 @@ const ModeSelector = compose(
   openPhonologyModal,
   launchSoundAndMarkup,
   id,
-  user
+  user,
+  metadata,
+  client
 }) => {
+  
   const modes = {};
   if (user.id !== undefined) {
     Object.assign(modes, {
@@ -249,15 +275,36 @@ const ModeSelector = compose(
       component: Merge,
     }
   });
+  const [qwe, setCount] = useState([]);
+  client.query({
+    query: perspectiveAuthor,
+    variables: {
+      id
+    },
+  }).then((result) => {
 
+    const authorsId = result.data.perspective.authors;
+    const options = authorsId.map((author) => {
+      return {
+        key: author.id, value: author.id, text: author.name
+      }
+
+    })
+    if (qwe.length === 0) {
+      console.log('5454')
+      metadata=[]
+      setCount(options)
+    }
+
+
+  });
   return (
     <Menu tabular>
-      { map(modes, (info, stub) =>
+      {map(modes, (info, stub) =>
         <Menu.Item key={stub} as={Link} to={`${baseUrl}/${stub}`} active={mode === stub}>
           {info.text}
-          {info.component === PerspectiveView ? <Counter id={id} mode={info.entitiesMode}/> : null}
-        </Menu.Item>
-      )}
+          {info.component === PerspectiveView ? <Counter id={id} mode={info.entitiesMode} /> : null}
+        </Menu.Item>)}
       <Tools
         id={id}
         mode={mode}
@@ -268,10 +315,11 @@ const ModeSelector = compose(
       />
       <Menu.Menu position="right">
         <Filter filter={filter} submitFilter={submitFilter} />
-        <DropdownFilter filter={filter} submitFilter={submitFilter} ></DropdownFilter>
+        <DropdownFilter filter={filter} submitFilter={submitFilter} id={id} metadata={metadata} qwe={qwe} />
       </Menu.Menu>
     </Menu>
-  );});
+  );
+});
 
 const soundAndMarkup = (perspectiveId, mode, launchSoundAndMarkup) => {
   launchSoundAndMarkup({
@@ -296,9 +344,12 @@ const Perspective = ({
   openPhonemicAnalysisModal,
   openPhonologyModal,
   launchSoundAndMarkup,
-  user
+  user,
+  metadata,
 }) => {
-  const { id, parent_id, mode, page, baseUrl } = perspective.params;
+  const {
+    id, parent_id, mode, page, baseUrl
+  } = perspective.params;
   if (!baseUrl) {
     return null;
   }
@@ -341,6 +392,7 @@ const Perspective = ({
     <Container fluid className="perspective inverted">
       <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />
       <ModeSelector
+        metadata={metadata}
         mode={mode}
         id={id}
         baseUrl={baseUrl}
@@ -353,7 +405,7 @@ const Perspective = ({
       />
       <Switch>
         <Redirect exact from={baseUrl} to={`${baseUrl}/view`} />
-        { map(modes, (info, stub) => (
+        {map(modes, (info, stub) => (
           <Route
             key={stub}
             path={`${baseUrl}/${stub}`}
@@ -385,5 +437,6 @@ Perspective.propTypes = {
 
 export default compose(
   connect(state => state.user),
+  graphql(queryMetadata, { name: 'metadata' }),
   graphql(launchSoundAndMarkupMutation, { name: 'launchSoundAndMarkup' })
 )(Perspective);

@@ -59,6 +59,7 @@ class AdditionalFilter extends PureComponent {
     }
     languagesTree.forEach((item) => {
       const isLanguage = !!item.dictionaries;
+      console.log(isLanguage)
       const type = isLanguage ? 'languages' : 'dictionaries';
 
       result[type].push([item.id[0], item.id[1]]);
@@ -143,7 +144,6 @@ class AdditionalFilter extends PureComponent {
 
   constructor(props) {
     super();
-
     const rawLanguagesTree = buildLanguageTree(fromJS(props.languagesQuery.language_tree)).toJS();
 
     const {
@@ -350,6 +350,7 @@ class AdditionalFilter extends PureComponent {
     }
 
     this.setState(state);
+    console.log(dataToSendToTop)
     this.props.onChange(dataToSendToTop);
   }
 
@@ -641,7 +642,6 @@ class AdditionalFilter extends PureComponent {
 const AdditionalFilterWrap = (props) => {
   const { languagesQuery } = props;
   const { error: languagesQueryError, loading: languagesQueryLoading } = languagesQuery;
-
   if (languagesQueryError) {
     return null;
   }

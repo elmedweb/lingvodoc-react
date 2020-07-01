@@ -48,7 +48,6 @@ class AdvancedFilter extends PureComponent {
 
   constructor() {
     super();
-
     this.onHasAudioChange = this.onHasAudioChange.bind(this);
     this.onKindChange = this.onKindChange.bind(this);
     this.onFieldChange = this.onFieldChange.bind(this);

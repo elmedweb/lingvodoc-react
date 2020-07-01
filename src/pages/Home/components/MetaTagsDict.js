@@ -1,146 +1,164 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import Immutable, { fromJS, Map } from 'immutable';
-import { assignDictsToTree, buildDictTrees } from 'pages/Search/treeBuilder';
-import Tree from './Tree';
-import { Dropdown } from 'semantic-ui-react';
-import gql from 'graphql-tag';
-import { graphql, withApollo } from 'react-apollo';
+import { Button, Header, Dropdown, Modal } from 'semantic-ui-react';
 import { compose } from 'recompose';
+import { graphql, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+import { getNodeValue } from '../../../components/Search/AdditionalFilter/Languages/helpers';
+import { buildLanguageTree } from 'pages/Search/treeBuilder';
+import { fromJS } from 'immutable';
+import Placeholder from 'components/Placeholder';
 
-import AdvancedFilter from './MetaTagsFilter'
-const optionsAuthorsList = [];
-let authorsList = [];
-
-let dicts = null;
-const metadataQuery = gql`
-  query metadata {
-    select_tags_metadata
-  }
-`;
-
-const AutorsName = gql`
-query AuthDictionaries($id:LingvodocID!) {
-  dictionary(id:$id) {
-    id
-    parent_id
-    translation
-    status
-    additional_metadata {
-      authors
-    }
-    perspectives {
+const languagesWithDictionariesQuery = gql`
+  query Languages {
+    language_tree {
       id
+      parent_id
       translation
+      dictionaries(deleted: false, published: true) {
+        id
+        parent_id
+        translation
+        category
+        additional_metadata{
+          authors
+        }
+      }
+      additional_metadata {
+        speakersAmount
+      }
     }
   }
-}
 `;
 
-class AuthorsDicts extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      arrayDictionary: []
-    };
-
-    this.equalValueFilter = this.equalValueFilter.bind(this);
-    this.selectedAuthor = [];
+const searchQuery = gql`
+  query Search($query: [[ObjectVal]]!, $category: Int, $adopted: Boolean, $etymology: Boolean, $mode: String, $langs: [LingvodocID], $dicts: [LingvodocID], $searchMetadata: ObjectVal, $blocks: Boolean, $xlsxExport: Boolean) {
+    advanced_search(search_strings: $query, category: $category, adopted: $adopted, etymology: $etymology, mode: $mode, languages: $langs, dicts_to_filter: $dicts, search_metadata: $searchMetadata, simple: $blocks, xlsx_export: $xlsxExport) {
+      dictionaries {
+        id
+        parent_id
+        translation
+        additional_metadata {
+          location
+          blobs
+        }
+      }
+      perspectives {
+        id
+        parent_id
+        translation
+        additional_metadata {
+          location
+        }
+        tree {
+          id
+          translation
+        }
+      }
+      lexical_entries {
+        id
+        parent_id
+        entities(mode: $mode) {
+          id
+          parent_id
+          field_id
+          link_id
+          self_id
+          created_at
+          locale_id
+          content
+          published
+          accepted
+        }
+      }
+      entities {
+        id
+      }
+      xlsx_url
+    }
+    language_tree {
+      id
+      parent_id
+      translation
+      created_at
+    }
   }
-  static isFieldLanguageVulnerability(name) {
-    return name === 'languageVulnerability';
-  }
+`;
 
-
-  render() {
-    const {
-      languagesTree, dictionaries, perspectives, isAuthenticated, location, data
-    } = this.props;
-
-    const {
-        hasAudio, kind, years, humanSettlement, authors,
-        languageVulnerability, isDataDefault, grammaticalSigns,
-      } = this.state;
-    if (this.props.data.loading === false) {
-      const dictList = data.select_tags_metadata.authors;
-
-      if (dictList) {
-        for (let i = 0; i < dictList.length - 1; i++) {
-          if (dictList[i] === ' ') {
-            break;
+function Test(props) {
+  let dictionariesId = [];
+  let languagesId = [];
+  const client = props.dicts.client;
+  const languageTree = props.dicts.data.language_tree;
+  const queryAllMetadata = () => {
+    languageTree.forEach((dict) => {
+      if (dict.dictionaries.length !== 0) {
+        for (let i = 0; dict.dictionaries.length > i; i++) {
+          if (dict.dictionaries[i].__typename === "Dictionary") {
+            dictionariesId.push(dict.dictionaries[i]);
           } else {
-            const obj = {
-              key: dictList[i],
-              value: dictList[i],
-              text: dictList[i],
-            };
-            optionsAuthorsList.push(obj);
+            languagesId.push(dict.dictionaries[i]);
           }
         }
       }
-    }
+      console.log(dictionariesId);
+      console.log(languagesId);
+    });
+  };
 
-    dicts = dictionaries;
-    if (this.selectedAuthor.length !== 0 || this.startDate || this.endDate) {
-      const dictsSource = fromJS(this.state.arrayDictionary);
-      const localDicts = fromJS(dictionaries);
-      const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
-      dicts = dictsSource.reduce(
-        (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
-        new Map()
-      );
-    }
-
-    const tree = assignDictsToTree(
-      buildDictTrees(fromJS({
-        lexical_entries: [],
-        perspectives,
-        dictionaries: dicts,
-      })),
-      languagesTree
-    );
-
-    return (
-      <div>
-<AdvancedFilter
-  show={this.state.showAdvancedFilter}
-  hasAudio={hasAudio}
-  kind={kind}
-  years={years}
-  humanSettlement={humanSettlement}
-  authors={authors}
-  languageVulnerability={languageVulnerability}
-  showVulnerabilityWarning={this.isNeedToShowVulnerabilityWarning()}
-
-  />
-       {/*  <Dropdown
-          className="dropdown_authors"
-          placeholder="Select authors"
-          onChange={this.handleChangeAuthors}
-          fluid
-          multiple
-          search
-          selection
-          options={this.equalValueFilter(optionsAuthorsList)}
-        />
-
-
-        <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} /> */}
-      </div>
-    );
-  }
+  queryAllMetadata();
+  const countryOptions = [
+    { key: 'af', value: 'af', flag: 'af', text: 'Afghanistan' },
+    { key: 'ax', value: 'ax', flag: 'ax', text: 'Aland Islands' },
+    { key: 'al', value: 'al', flag: 'al', text: 'Albania' },
+    { key: 'dz', value: 'dz', flag: 'dz', text: 'Algeria' },
+    { key: 'as', value: 'as', flag: 'as', text: 'American Samoa' },
+    { key: 'ad', value: 'ad', flag: 'ad', text: 'Andorra' },
+    { key: 'ao', value: 'ao', flag: 'ao', text: 'Angola' },
+    { key: 'ai', value: 'ai', flag: 'ai', text: 'Anguilla' },
+    { key: 'ag', value: 'ag', flag: 'ag', text: 'Antigua' },
+    { key: 'ar', value: 'ar', flag: 'ar', text: 'Argentina' },
+    { key: 'am', value: 'am', flag: 'am', text: 'Armenia' },
+    { key: 'aw', value: 'aw', flag: 'aw', text: 'Aruba' },
+    { key: 'au', value: 'au', flag: 'au', text: 'Australia' },
+    { key: 'at', value: 'at', flag: 'at', text: 'Austria' },
+    { key: 'az', value: 'az', flag: 'az', text: 'Azerbaijan' },
+    { key: 'bs', value: 'bs', flag: 'bs', text: 'Bahamas' },
+    { key: 'bh', value: 'bh', flag: 'bh', text: 'Bahrain' },
+    { key: 'bd', value: 'bd', flag: 'bd', text: 'Bangladesh' },
+    { key: 'bb', value: 'bb', flag: 'bb', text: 'Barbados' },
+    { key: 'by', value: 'by', flag: 'by', text: 'Belarus' },
+    { key: 'be', value: 'be', flag: 'be', text: 'Belgium' },
+    { key: 'bz', value: 'bz', flag: 'bz', text: 'Belize' },
+    { key: 'bj', value: 'bj', flag: 'bj', text: 'Benin' },
+  ]
+  return (
+    <div>
+      <Modal trigger={<Button>Show Modal</Button>}>
+        <Modal.Header>Select a Photo</Modal.Header>
+        <Modal.Content image>
+          <Modal.Description>
+            <Header>Default Profile Image</Header>
+            <Dropdown
+              placeholder='Select authors'
+              fluid
+              search
+              selection
+              options={countryOptions}
+            />
+          </Modal.Description>
+        </Modal.Content>
+      </Modal>
+    </div>
+  );
 }
 
-AuthorsDicts.propTypes = {
-  location: PropTypes.object.isRequired,
-  languagesTree: PropTypes.instanceOf(Immutable.List).isRequired,
-  dictionaries: PropTypes.instanceOf(Immutable.Map).isRequired,
-  perspectives: PropTypes.instanceOf(Immutable.List).isRequired,
-  isAuthenticated: PropTypes.bool,
-};
 
-AuthorsDicts.defaultProps = {
-  isAuthenticated: false,
-};
+const test2 = props => (
+  <div>
+    {props.data.loading && (<Placeholder />)}
+    {!props.data.loading && (<Test dicts={props} />)}
+  </div>
+);
 
-export default compose(graphql(metadataQuery), withApollo)(AuthorsDicts);
+export default compose(graphql(languagesWithDictionariesQuery), withApollo)(test2);
+

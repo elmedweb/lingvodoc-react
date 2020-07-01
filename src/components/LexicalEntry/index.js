@@ -266,7 +266,7 @@ const test1=[ ens =>
 
 const test=flow(test1)(entry)
 /* console.log('ent',entry) */
-console.log('test',perspectiveId)
+
     return (
       <ul>
         {entities.map(entity => (

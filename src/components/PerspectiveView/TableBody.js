@@ -20,29 +20,31 @@ const TableBody = ({
   selectDisabledIndeterminate,
   disabledEntrySet,
   removeSelectionEntrySet,
-}) => (
-  <Table.Body>
-    {entries.map(entry => (
-      <Row
-        key={entry.id}
-        perspectiveId={perspectiveId}
-        entry={entry}
-        columns={columns}
-        mode={mode}
-        entitiesMode={entitiesMode}
-        actions={actions}
-        selectEntries={selectEntries}
-        selectedEntries={selectedEntries}
-        onEntrySelect={onEntrySelect}
-        showEntryId={showEntryId}
-        selectDisabled={selectDisabled}
-        selectDisabledIndeterminate={selectDisabledIndeterminate}
-        disabledEntrySet={disabledEntrySet}
-        removeSelectionEntrySet={removeSelectionEntrySet}
-      />
-    ))}
-  </Table.Body>
-);
+}) => {
+  return (
+    <Table.Body>
+      {entries.map(entry => (
+        <Row
+          key={entry.id}
+          perspectiveId={perspectiveId}
+          entry={entry}
+          columns={columns}
+          mode={mode}
+          entitiesMode={entitiesMode}
+          actions={actions}
+          selectEntries={selectEntries}
+          selectedEntries={selectedEntries}
+          onEntrySelect={onEntrySelect}
+          showEntryId={showEntryId}
+          selectDisabled={selectDisabled}
+          selectDisabledIndeterminate={selectDisabledIndeterminate}
+          disabledEntrySet={disabledEntrySet}
+          removeSelectionEntrySet={removeSelectionEntrySet}
+        />
+      ))}
+    </Table.Body>
+  );
+}
 
 TableBody.propTypes = {
   perspectiveId: PropTypes.array.isRequired,

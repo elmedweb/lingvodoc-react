@@ -45,7 +45,7 @@ export const queryPerspective = gql`
     }
   }
 `;
-// console alex
+
 export const queryLexicalEntries = gql`
   query queryPerspective2($id: LingvodocID!, $entitiesMode: String!) {
     perspective(id: $id) {
@@ -141,43 +141,43 @@ const TableComponent = ({
   removeSelectionEntrySet,
   actions,
 }) => (
-  <div style={{ overflowY: 'auto' }}>
-    <Table celled padded>
-      <TableHeader
-        columns={columns}
-        entries={entries}
-        selectEntries={selectEntries}
-        selectedEntries={selectedEntries}
-        onEntrySelect={onEntrySelect}
-        selectAllEntries={selectAllEntries}
-        selectAllIndeterminate={selectAllIndeterminate}
-        selectAllChecked={selectAllChecked}
-        onAllEntriesSelect={onAllEntriesSelect}
-        showEntryId={showEntryId}
-        selectDisabled={selectDisabled}
-        selectDisabledIndeterminate={selectDisabledIndeterminate}
-        disabled={disabledHeader}
-        actions={actions}
-      />
-      <TableBody
-        perspectiveId={perspectiveId}
-        entitiesMode={entitiesMode}
-        entries={entries}
-        columns={columns}
-        mode={mode}
-        actions={actions}
-        selectEntries={selectEntries}
-        selectedEntries={selectedEntries}
-        onEntrySelect={onEntrySelect}
-        showEntryId={showEntryId}
-        selectDisabled={selectDisabled}
-        selectDisabledIndeterminate={selectDisabledIndeterminate}
-        disabledEntrySet={disabledEntrySet}
-        removeSelectionEntrySet={removeSelectionEntrySet}
-      />
-    </Table>
-  </div>
-);
+    <div style={{ overflowY: 'auto' }}>
+      <Table celled padded>
+        <TableHeader
+          columns={columns}
+          entries={entries}
+          selectEntries={selectEntries}
+          selectedEntries={selectedEntries}
+          onEntrySelect={onEntrySelect}
+          selectAllEntries={selectAllEntries}
+          selectAllIndeterminate={selectAllIndeterminate}
+          selectAllChecked={selectAllChecked}
+          onAllEntriesSelect={onAllEntriesSelect}
+          showEntryId={showEntryId}
+          selectDisabled={selectDisabled}
+          selectDisabledIndeterminate={selectDisabledIndeterminate}
+          disabled={disabledHeader}
+          actions={actions}
+        />
+        <TableBody
+          perspectiveId={perspectiveId}
+          entitiesMode={entitiesMode}
+          entries={entries}
+          columns={columns}
+          mode={mode}
+          actions={actions}
+          selectEntries={selectEntries}
+          selectedEntries={selectedEntries}
+          onEntrySelect={onEntrySelect}
+          showEntryId={showEntryId}
+          selectDisabled={selectDisabled}
+          selectDisabledIndeterminate={selectDisabledIndeterminate}
+          disabledEntrySet={disabledEntrySet}
+          removeSelectionEntrySet={removeSelectionEntrySet}
+        />
+      </Table>
+    </div>
+  );
 
 TableComponent.propTypes = {
   columns: PropTypes.array.isRequired,
@@ -195,7 +195,7 @@ TableComponent.defaultProps = {
   actions: [],
   selectEntries: false,
   selectedEntries: [],
-  onEntrySelect: () => {},
+  onEntrySelect: () => { },
 };
 
 const P = ({
@@ -311,13 +311,20 @@ const P = ({
     es =>
       (!!filter && filter.length > 0
         ? es.filter((entry) => {
-          // console.log(entry)
-          entry.entities.forEach((e) => {
-            if (e.additional_metadata.authors.length) {
-              console.log(entry);
-            }
-          });
-          return !!entry.entities.find(entity => typeof entity.content === 'string' && entity.content.indexOf(filter) >= 0);
+          /*    console.log(entry) */
+          //Alex
+          if (typeof Number(filter) === 'number') {
+            console.log('number',filter)
+            console.log(entry)
+            return !!entry.entities.find(entity => typeof entity.additional_metadata.authors === 'string' && entity.content.indexOf(filter) >= 0);
+          } else if (typeof Number(filter) === 'NaN') {
+            console.log('string',typeof filter)
+            return !!entry.entities.find(entity => typeof entity.content === 'string' && entity.content.indexOf(filter) >= 0);
+          }else{
+            console.log('Number(filter)',Number(filter))
+          }
+
+
         })
         : es),
     // apply sorting
@@ -584,7 +591,7 @@ LexicalEntryViewBase.defaultProps = {
   actions: [],
   selectEntries: false,
   selectedEntries: [],
-  onEntrySelect: () => {},
+  onEntrySelect: () => { },
 };
 
 export const queryLexicalEntriesByIds = gql`

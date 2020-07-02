@@ -101,11 +101,11 @@ const isAdditionalParamsSet = (langs, dicts, searchMetadata) => {
   }
 
   if (searchMetadata &&
-      searchMetadata.hasAudio !== null &&
-      searchMetadata.kind !== null &&
-      searchMetadata.years.length > 0 &&
-      searchMetadata.humanSettlement.length > 0 &&
-      searchMetadata.authors.length > 0) {
+    searchMetadata.hasAudio !== null &&
+    searchMetadata.kind !== null &&
+    searchMetadata.years.length > 0 &&
+    searchMetadata.humanSettlement.length > 0 &&
+    searchMetadata.authors.length > 0) {
     return true;
   }
 
@@ -551,7 +551,7 @@ class SearchTabs extends React.Component {
       .filter(dict => dict.additional_metadata && dict.additional_metadata.location)
       .map(dict => dict.id)
       .length;
-    
+
     if (dictionariesCount === 0) {
       return false;
     }
@@ -596,7 +596,7 @@ class SearchTabs extends React.Component {
         actions.deleteSearch(id);
       };
     }
-
+    console.log(searches)
     const searchPanes = searches.map(search => ({
       menuItem: (
         <Menu.Item key={search.id}>

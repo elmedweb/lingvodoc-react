@@ -86,26 +86,28 @@ const searchQuery = gql`
 
 function Test(props) {
   let dictionariesId = [];
-  let languagesId = [];
   const client = props.dicts.client;
   const languageTree = props.dicts.data.language_tree;
   const queryAllMetadata = () => {
     languageTree.forEach((dict) => {
       if (dict.dictionaries.length !== 0) {
         for (let i = 0; dict.dictionaries.length > i; i++) {
-          if (dict.dictionaries[i].__typename === "Dictionary") {
+        
             dictionariesId.push(dict.dictionaries[i]);
-          } else {
-            languagesId.push(dict.dictionaries[i]);
-          }
+        
         }
       }
-      console.log(dictionariesId);
-      console.log(languagesId);
+     
+
     });
   };
 
   queryAllMetadata();
+  console.log(dictionariesId);
+  const optionsAuthors = dictionariesId.map(item=>{
+    item.additional_metadata.authors.forEach(author=>{return author})
+  })
+  console.log('optionsAuthors',optionsAuthors)
   const countryOptions = [
     { key: 'af', value: 'af', flag: 'af', text: 'Afghanistan' },
     { key: 'ax', value: 'ax', flag: 'ax', text: 'Aland Islands' },

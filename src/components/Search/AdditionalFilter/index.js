@@ -59,7 +59,6 @@ class AdditionalFilter extends PureComponent {
     }
     languagesTree.forEach((item) => {
       const isLanguage = !!item.dictionaries;
-      console.log(isLanguage)
       const type = isLanguage ? 'languages' : 'dictionaries';
 
       result[type].push([item.id[0], item.id[1]]);

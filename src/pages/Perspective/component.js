@@ -34,14 +34,6 @@ const queryCounter = gql`
   }
 `;
 
-const Counter = graphql(queryCounter)(({ data }) => {
-  if (data.loading || data.error) {
-    return null;
-  }
-  const { perspective: { counter } } = data;
-  return ` (${counter})`;
-});
-
 const toolsQuery = gql`
   query tools($id: LingvodocID!) {
     perspective(id: $id) {
@@ -50,20 +42,27 @@ const toolsQuery = gql`
     }
   }
 `;
-const queryMetadata = gql`
-query metadata{
-  select_tags_metadata
-}`;
+
 const perspectiveAuthor = gql`
-query metadata($id: LingvodocID!) {
+query perspectiveID($id: LingvodocID!) {
   perspective(id:$id){
     id
-  authors{
-    id
-    name
+    authors{
+      id
+      name
   }
-  }
+ }
 }`;
+
+const Counter = graphql(queryCounter)(({ data }) => {
+  if (data.loading || data.error) {
+    return null;
+  }
+  const { perspective: { counter } } = data;
+  return ` (${counter})`;
+});
+
+
 const Tools = graphql(toolsQuery)(({
   data,
   openCognateAnalysisModal,
@@ -176,11 +175,13 @@ const handlers1 = compose(
   withState('value', 'updateValue', props => props.filter),
   withHandlers({
     onChange(props) {
-      return event => props.updateValue(event.target.innerText);
+/*       return event =>  props.updateValue(Number(event.currentTarget.id) ); */
+return event =>  props.updateValue(event.currentTarget.id);
     },
     onSubmit(props) {
       return (event) => {
         event.preventDefault();
+        console.log('props',props.value)
         props.submitFilter(props.value);
       };
     },
@@ -199,19 +200,17 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
 
 
 const DropdownFilter = handlers1(({
-  value, onChange, onSubmit, qwe
+  value, onChange, onSubmit, optionsList=[]
 }) => {
-
-
-  console.log(qwe)
+  console.log(optionsList)
   return (
     <div className="ui right aligned category search item">
       <form className="ui transparent icon input" onSubmit={onSubmit}>
         <Dropdown
-          placeholder="Skills"
+          placeholder="Authors"
           search
           selection
-          /*  options={qwe} */
+          options={optionsList}
           onChange={onChange}
           type="submit"
         />
@@ -239,7 +238,6 @@ const ModeSelector = compose(
   launchSoundAndMarkup,
   id,
   user,
-  metadata,
   client
 }) => {
   
@@ -275,7 +273,7 @@ const ModeSelector = compose(
       component: Merge,
     }
   });
-  const [qwe, setCount] = useState([]);
+  const [optionsList, setOptionsList] = useState([]);
   client.query({
     query: perspectiveAuthor,
     variables: {
@@ -286,14 +284,12 @@ const ModeSelector = compose(
     const authorsId = result.data.perspective.authors;
     const options = authorsId.map((author) => {
       return {
-        key: author.id, value: author.id, text: author.name
+        key: author.id, value: author.id, text: author.name, id:author.id
       }
 
     })
-    if (qwe.length === 0) {
-      console.log('5454')
-      metadata=[]
-      setCount(options)
+    if (optionsList.length === 0) {
+      setOptionsList(options)
     }
 
 
@@ -315,7 +311,7 @@ const ModeSelector = compose(
       />
       <Menu.Menu position="right">
         <Filter filter={filter} submitFilter={submitFilter} />
-        <DropdownFilter filter={filter} submitFilter={submitFilter} id={id} metadata={metadata} qwe={qwe} />
+        <DropdownFilter filter={filter} submitFilter={submitFilter} id={id}  optionsList={optionsList} />
       </Menu.Menu>
     </Menu>
   );
@@ -345,7 +341,6 @@ const Perspective = ({
   openPhonologyModal,
   launchSoundAndMarkup,
   user,
-  metadata,
 }) => {
   const {
     id, parent_id, mode, page, baseUrl
@@ -387,12 +382,11 @@ const Perspective = ({
     }
   });
 
-
+console.log('id',id)
   return (
     <Container fluid className="perspective inverted">
       <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />
       <ModeSelector
-        metadata={metadata}
         mode={mode}
         id={id}
         baseUrl={baseUrl}
@@ -437,6 +431,5 @@ Perspective.propTypes = {
 
 export default compose(
   connect(state => state.user),
-  graphql(queryMetadata, { name: 'metadata' }),
   graphql(launchSoundAndMarkupMutation, { name: 'launchSoundAndMarkup' })
 )(Perspective);

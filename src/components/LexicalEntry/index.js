@@ -251,21 +251,10 @@ class Entities extends React.Component {
     }
 
     const filters = [
-      ens => ens.filter(entity => isEqual(entity.field_id, column.id)) ,
+      ens => ens.filter(entity => isEqual(entity.field_id, column.id)),
       ens => (!parentEntity ? ens : ens.filter(e => isEqual(e.self_id, parentEntity.id))),
     ];
     const entities = flow(filters)(entry.entities);
-  
-const test1=[ ens =>
-  {/* ens.forEach(e=>console.log(e)) */
-  /*   console.log(ens) */
-    
-   /*  return  ens.filter(entity => isEqual(entity.field_id, column.id)) */ } ,
-  ens => (!parentEntity ? ens : ens.filter(e => isEqual(e.entities.self_id, parentEntity.id))),]
-
-
-const test=flow(test1)(entry)
-/* console.log('ent',entry) */
 
     return (
       <ul>

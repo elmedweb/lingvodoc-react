@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { graphql } from 'react-apollo';
+import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { isEqual, find, take, drop, flow, sortBy, reverse } from 'lodash';
 import { Table, Dimmer, Header, Icon, Button } from 'semantic-ui-react';
@@ -120,6 +120,12 @@ const removeLexicalEntriesMutation = gql`
   }
 `;
 
+const clientIdList =
+  gql` query clientIdList ($clientIdList:[Int]!){
+    client_list(client_id_list : $clientIdList)
+    }
+  `
+
 const TableComponent = ({
   columns,
   perspectiveId,
@@ -219,7 +225,8 @@ const P = ({
   openModal: openNewModal,
   createdEntries,
   selectedEntries,
-  user
+  user,
+  client
 }) => {
   const { loading, error } = data;
 
@@ -311,20 +318,29 @@ const P = ({
     es =>
       (!!filter && filter.length > 0
         ? es.filter((entry) => {
-          /*    console.log(entry) */
-          //Alex
-          if (typeof Number(filter) === 'number') {
-            console.log('number',filter)
-            console.log(entry)
-            return !!entry.entities.find(entity => typeof entity.additional_metadata.authors === 'string' && entity.content.indexOf(filter) >= 0);
-          } else if (typeof Number(filter) === 'NaN') {
-            console.log('string',typeof filter)
+          console.log(typeof filter)
+        /*   if (typeof Number(filter) === 'number') {
+            let client_id = entry.entities.map(el => {
+              return el.id[0]
+            })
+            client.query({
+              query: clientIdList,
+              variables: { clientIdList: client_id },
+            }).then(result => {
+              const clientListId = result.data.client_list.map(el => {
+                return el[1]
+              })
+              return clientListId
+            }).then(el => {
+              console.log(el.find(enti => Number(filter) === enti))
+              return !!el.find(enti => Number(filter) === enti);
+            })
+          } else if (typeof Number(filter) === 'undefined') { */
+          
             return !!entry.entities.find(entity => typeof entity.content === 'string' && entity.content.indexOf(filter) >= 0);
-          }else{
-            console.log('Number(filter)',Number(filter))
-          }
-
-
+         /*  } else {
+            console.log('Number(filter)', Number(filter))
+          } */
         })
         : es),
     // apply sorting
@@ -479,7 +495,7 @@ const PerspectiveView = compose(
   graphql(removeLexicalEntriesMutation, { name: 'removeLexicalEntries' }),
   graphql(queryLexicalEntries, {
     options: { notifyOnNetworkStatusChange: true },
-  })
+  }), withApollo
 )(P);
 
 export const queryLexicalEntry = gql`

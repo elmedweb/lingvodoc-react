@@ -202,7 +202,7 @@ const Filter = handlers(({ value, onChange, onSubmit }) => (
 const DropdownFilter = handlers1(({
   value, onChange, onSubmit, optionsList=[]
 }) => {
-  console.log(optionsList)
+
   return (
     <div className="ui right aligned category search item">
       <form className="ui transparent icon input" onSubmit={onSubmit}>
@@ -349,7 +349,7 @@ const Perspective = ({
     return null;
   }
 
-  const modes = {};
+  const modes = {}; 
   if (user.id !== undefined) {
     Object.assign(modes, {
       edit: {
@@ -382,7 +382,7 @@ const Perspective = ({
     }
   });
 
-console.log('id',id)
+
   return (
     <Container fluid className="perspective inverted">
       <PerspectivePath id={id} dictionary_id={parent_id} mode={mode} />

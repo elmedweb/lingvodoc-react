@@ -181,7 +181,7 @@ return event =>  props.updateValue(event.currentTarget.id);
     onSubmit(props) {
       return (event) => {
         event.preventDefault();
-        console.log('props',props.value)
+
         props.submitFilter(props.value);
       };
     },

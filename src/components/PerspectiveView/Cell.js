@@ -76,7 +76,6 @@ function Cell(props) {
   const { perspectiveId, entry, column, columns, mode, entitiesMode, } = props;
   const [textCell, setTextCell] = useState(' ')
   const textHover = (e) => {
-    console.log(e.target.innerText)
     setTextCell(e.target.innerText)
   }
   return (

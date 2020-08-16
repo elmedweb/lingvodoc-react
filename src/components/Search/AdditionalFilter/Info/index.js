@@ -56,7 +56,7 @@ class AdditionalFilterInfo extends PureComponent {
     const buttonText = showInfo ? closeText : showText;
     const buttonClassName = showInfo ? `${classNames.toggleButton} ${classNames.toggleButtonClose}` :
       `${classNames.toggleButton} ${classNames.toggleButtonShow}`;
-    
+
     const grammarClickCallback = onClickCallbacks.grammar || null;
 
     return (

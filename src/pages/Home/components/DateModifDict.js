@@ -55,7 +55,7 @@ class ModifDateDicts extends React.Component {
       query: AutorsName,
       variables: { id: id_dictionary._tail.array }
     }).then((result) => {
-        console.log(result)
+      
       authorsList.push(result.data.dictionary);
       this.setState({ arrayDictionary: authorsList });
     });

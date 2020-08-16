@@ -21,6 +21,7 @@ import './style.scss';
 
 import { newSearch, deleteSearch, storeSearchResult, newSearchWithAdditionalFields } from 'ducks/search';
 
+
 const mdColors = new Immutable.List([
   '#E53935',
   '#D81B60',
@@ -596,7 +597,7 @@ class SearchTabs extends React.Component {
         actions.deleteSearch(id);
       };
     }
-    console.log(searches)
+
     const searchPanes = searches.map(search => ({
       menuItem: (
         <Menu.Item key={search.id}>

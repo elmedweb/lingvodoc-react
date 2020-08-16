@@ -10,7 +10,7 @@ import Immutable, { fromJS, Map } from 'immutable';
 import { Container, Form, Radio, Segment, Button } from 'semantic-ui-react';
 
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
-import {setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode } from 'ducks/home';
+import { setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode } from 'ducks/home';
 
 import config from 'config';
 
@@ -333,7 +333,15 @@ const Home = (props) => {
         }
         {
           selectMode === 'metaTagsMode' && (
-            <MetaTagsDict />
+            <MetaTagsDict
+              location={props.location}
+              languagesTree={languagesTree}
+              languages={languages}
+              dictionaries={dicts}
+              perspectives={perspectivesList}
+              isAuthenticated={isAuthenticated}
+              dictsSource={dictsSource}
+            />
           )
         }
 
@@ -444,7 +452,7 @@ const AuthWrapper = ({
       state => ({ ...state.home, ...state.router }),
       dispatch => ({
         actions: bindActionCreators({
-          setMetaTagsMode,     setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode
+          setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode
         }, dispatch)
       })
     ),

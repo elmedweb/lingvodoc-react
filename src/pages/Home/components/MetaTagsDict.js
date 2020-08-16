@@ -1,37 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Header, Dropdown, Modal } from 'semantic-ui-react';
 import { compose } from 'recompose';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { getNodeValue } from '../../../components/Search/AdditionalFilter/Languages/helpers';
-import { buildLanguageTree } from 'pages/Search/treeBuilder';
 import { fromJS } from 'immutable';
 import Placeholder from 'components/Placeholder';
+import { assignDictsToTree, buildDictTrees, buildLanguageTree } from 'pages/Search/treeBuilder';
+import LangsNav from 'pages/Home/components/LangsNav';
+import Tree from './Tree';
+import QueryBuilder from 'components/Search/QueryBuilder';
 
-const languagesWithDictionariesQuery = gql`
-  query Languages {
-    language_tree {
-      id
-      parent_id
-      translation
-      dictionaries(deleted: false, published: true) {
-        id
-        parent_id
-        translation
-        category
-        additional_metadata{
-          authors
-        }
-      }
-      additional_metadata {
-        speakersAmount
-      }
-    }
-  }
-`;
+const select_tags_metadata = gql`query select_tags_metadata{
+  select_tags_metadata
+}`;
+
 
 const searchQuery = gql`
-  query Search($query: [[ObjectVal]]!, $category: Int, $adopted: Boolean, $etymology: Boolean, $mode: String, $langs: [LingvodocID], $dicts: [LingvodocID], $searchMetadata: ObjectVal, $blocks: Boolean, $xlsxExport: Boolean) {
+  query Search($query: [[ObjectVal]]!,
+     $category: Int,
+      $adopted: Boolean, 
+      $etymology: Boolean,
+       $mode: String,
+        $langs: [LingvodocID],
+         $dicts: [LingvodocID],
+          $searchMetadata: ObjectVal,
+           $blocks: Boolean, 
+           $xlsxExport: Boolean) 
+           {
     advanced_search(search_strings: $query, category: $category, adopted: $adopted, etymology: $etymology, mode: $mode, languages: $langs, dicts_to_filter: $dicts, search_metadata: $searchMetadata, simple: $blocks, xlsx_export: $xlsxExport) {
       dictionaries {
         id
@@ -84,83 +80,163 @@ const searchQuery = gql`
   }
 `;
 
-function Test(props) {
-  let dictionariesId = [];
-  const client = props.dicts.client;
-  const languageTree = props.dicts.data.language_tree;
-  const queryAllMetadata = () => {
-    languageTree.forEach((dict) => {
-      if (dict.dictionaries.length !== 0) {
-        for (let i = 0; dict.dictionaries.length > i; i++) {
-        
-            dictionariesId.push(dict.dictionaries[i]);
-        
-        }
-      }
-     
+const dropdownStyle = {
+  margin: '20px 0'
+};
+const test2 = (props) => {
+  const {
+    languagesTree, dictionaries, perspectives, isAuthenticated, languages, location, data: { select_tags_metadata: metaTags }
+  } = props;
 
-    });
-  };
+  const tree = assignDictsToTree(
+    buildDictTrees(fromJS({
+      lexical_entries: [],
+      perspectives,
+      dictionaries,
+    })),
+    languagesTree
+  );
 
-  queryAllMetadata();
-  console.log(dictionariesId);
-  const optionsAuthors = dictionariesId.map(item=>{
-    item.additional_metadata.authors.forEach(author=>{return author})
-  })
-  console.log('optionsAuthors',optionsAuthors)
-  const countryOptions = [
-    { key: 'af', value: 'af', flag: 'af', text: 'Afghanistan' },
-    { key: 'ax', value: 'ax', flag: 'ax', text: 'Aland Islands' },
-    { key: 'al', value: 'al', flag: 'al', text: 'Albania' },
-    { key: 'dz', value: 'dz', flag: 'dz', text: 'Algeria' },
-    { key: 'as', value: 'as', flag: 'as', text: 'American Samoa' },
-    { key: 'ad', value: 'ad', flag: 'ad', text: 'Andorra' },
-    { key: 'ao', value: 'ao', flag: 'ao', text: 'Angola' },
-    { key: 'ai', value: 'ai', flag: 'ai', text: 'Anguilla' },
-    { key: 'ag', value: 'ag', flag: 'ag', text: 'Antigua' },
-    { key: 'ar', value: 'ar', flag: 'ar', text: 'Argentina' },
-    { key: 'am', value: 'am', flag: 'am', text: 'Armenia' },
-    { key: 'aw', value: 'aw', flag: 'aw', text: 'Aruba' },
-    { key: 'au', value: 'au', flag: 'au', text: 'Australia' },
-    { key: 'at', value: 'at', flag: 'at', text: 'Austria' },
-    { key: 'az', value: 'az', flag: 'az', text: 'Azerbaijan' },
-    { key: 'bs', value: 'bs', flag: 'bs', text: 'Bahamas' },
-    { key: 'bh', value: 'bh', flag: 'bh', text: 'Bahrain' },
-    { key: 'bd', value: 'bd', flag: 'bd', text: 'Bangladesh' },
-    { key: 'bb', value: 'bb', flag: 'bb', text: 'Barbados' },
-    { key: 'by', value: 'by', flag: 'by', text: 'Belarus' },
-    { key: 'be', value: 'be', flag: 'be', text: 'Belgium' },
-    { key: 'bz', value: 'bz', flag: 'bz', text: 'Belize' },
-    { key: 'bj', value: 'bj', flag: 'bj', text: 'Benin' },
-  ]
+  function builderOptions(arg) {
+    return arg.map((el, index) => ({ key: index, value: el.toString(), text: el.toString() }));
+  }
+  const dictLocal = dictionaries.toJS();
+
+  const dictisToFilter = Object.entries(dictLocal).map(([key, value]) => value.id);
+
+  const langToFilter = languages.map(lang => lang.id);
+
+  console.log(langToFilter)
+  const hasAudioOptions = builderOptions(metaTags.hasAudio);
+  const nativeSpeakersCountOptions = builderOptions(metaTags.nativeSpeakersCount);
+  const dataSoursOptions = builderOptions(metaTags.kind);
+  const yearsOptions = builderOptions(metaTags.years);
+  const settlementOptions = builderOptions(metaTags.humanSettlement);
+  const authorsOptions = builderOptions(metaTags.authors);
+
+  const [open, setOpen] = React.useState(false);
+  const [hasAudio, setHasAudio] = useState(null);
+  const [nativeSpeakersCount, setNativeSpeakersCount] = useState(null);
+  const [kind, setKind] = useState(null);
+  const [years, setYears] = useState(null);
+  const [humanSettlement, setHumanSettlement] = useState(null);
+  const [authors, setAuthors] = useState(null);
+  let searchMetadata = {};
+
+  function builderQuery() {
+    searchMetadata = {};
+    setOpen(false);
+    searchMetadata = {
+      hasAudio,
+      nativeSpeakersCount,
+      kind,
+      years,
+      humanSettlement,
+      authors
+    };
+    console.log(searchMetadata);
+  }
+  function fieldCleaner() {
+    setOpen(false);
+    setHasAudio(null);
+    setNativeSpeakersCount(null);
+    setKind(null);
+    setYears(null);
+    setHumanSettlement(null);
+    setAuthors(null);
+  }
   return (
     <div>
-      <Modal trigger={<Button>Show Modal</Button>}>
-        <Modal.Header>Select a Photo</Modal.Header>
-        <Modal.Content image>
+      <Modal
+        onClose={() => setOpen(false)}
+        onOpen={() => setOpen(true)}
+        open={open}
+        trigger={<Button>Show Modal</Button>}
+      >
+        <Modal.Header>Выберите теги для поиска</Modal.Header>
+        <Modal.Content >
           <Modal.Description>
-            <Header>Default Profile Image</Header>
+            <Header>Теги</Header>
             <Dropdown
-              placeholder='Select authors'
+              placeholder="Audio"
               fluid
               search
               selection
-              options={countryOptions}
+              value={hasAudio}
+              options={hasAudioOptions}
+              onChange={(event, value) => setHasAudio(value.value)}
+            />
+            <Dropdown
+              style={dropdownStyle}
+              placeholder="Language degree of endangerment"
+              fluid
+              search
+              selection
+              value={nativeSpeakersCount}
+              options={nativeSpeakersCountOptions}
+              onChange={(event, value) => setNativeSpeakersCount(value.value)}
+            />
+            <Dropdown
+              style={dropdownStyle}
+              placeholder="Data sourcet"
+              fluid
+              search
+              selection
+              value={kind}
+              options={dataSoursOptions}
+              onChange={(event, value) => setKind(value.value)}
+            />
+            <Dropdown
+              style={dropdownStyle}
+              placeholder="Years"
+              fluid
+              search
+              selection
+              value={years}
+              options={yearsOptions}
+              onChange={(event, value) => setYears(value.value)}
+            />
+
+            <Dropdown
+              style={dropdownStyle}
+              placeholder="Settlement"
+              fluid
+              search
+              selection
+              value={humanSettlement}
+              options={settlementOptions}
+              onChange={(event, value) => setHumanSettlement(value.value)}
+            />
+            <Dropdown
+              style={dropdownStyle}
+              placeholder="Authors"
+              fluid
+              search
+              selection
+              value={authors}
+              options={authorsOptions}
+              onChange={(event, value) => setAuthors(value.value)}
             />
           </Modal.Description>
         </Modal.Content>
+        <Modal.Actions>
+          <Button color="black" onClick={() => fieldCleaner()}>
+            Nope
+          </Button>
+          <Button
+            content="Yep, that's me"
+            labelPosition="right"
+            icon="checkmark"
+            onClick={() => builderQuery()}
+            positive
+          />
+        </Modal.Actions>
       </Modal>
+      <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
     </div>
   );
-}
+};
 
 
-const test2 = props => (
-  <div>
-    {props.data.loading && (<Placeholder />)}
-    {!props.data.loading && (<Test dicts={props} />)}
-  </div>
-);
-
-export default compose(graphql(languagesWithDictionariesQuery), withApollo)(test2);
+export default graphql(select_tags_metadata)(test2);
 

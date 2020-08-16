@@ -349,7 +349,7 @@ class AdditionalFilter extends PureComponent {
     }
 
     this.setState(state);
-    console.log(dataToSendToTop)
+
     this.props.onChange(dataToSendToTop);
   }
 

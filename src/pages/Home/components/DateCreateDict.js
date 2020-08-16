@@ -42,7 +42,6 @@ class ModifDateDicts extends React.Component {
     this.state = {
       arrayDictionary: []
     };
-    console.log(props);
     this.startDate = null;
     this.endDate = null;
     this.selectedAuthor = [];
@@ -74,7 +73,7 @@ class ModifDateDicts extends React.Component {
         const last_modified_at_Dictionary = dictionary.getIn(['created_at']);
         const id_dictionary = dictionary.getIn(['id']);
         last_modified_at_Dictionary_mody = (new Date(Math.trunc(last_modified_at_Dictionary) * 1000)).setHours(0, 0, 0, 0);
-        console.log(last_modified_at_Dictionary_mody);
+
         if (last_modified_at_Dictionary_mody >= this.startDate && !this.endDate) {
           this.requestData(id_dictionary);
         } else if (last_modified_at_Dictionary_mody >= this.startDate && last_modified_at_Dictionary_mody <= this.endDate) {

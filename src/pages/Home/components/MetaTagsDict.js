@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Header, Dropdown, Modal } from 'semantic-ui-react';
+import { newSearch, deleteSearch, storeSearchResult, newSearchWithAdditionalFields } from 'ducks/search';
 import { compose } from 'recompose';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -10,6 +11,9 @@ import { assignDictsToTree, buildDictTrees, buildLanguageTree } from 'pages/Sear
 import LangsNav from 'pages/Home/components/LangsNav';
 import Tree from './Tree';
 import QueryBuilder from 'components/Search/QueryBuilder';
+import { connect } from 'react-redux';
+import { compositeIdToString as id2str } from 'utils/compositeId';
+import { bindActionCreators } from 'redux';
 
 const select_tags_metadata = gql`query select_tags_metadata{
   select_tags_metadata
@@ -28,7 +32,16 @@ const searchQuery = gql`
            $blocks: Boolean, 
            $xlsxExport: Boolean) 
            {
-    advanced_search(search_strings: $query, category: $category, adopted: $adopted, etymology: $etymology, mode: $mode, languages: $langs, dicts_to_filter: $dicts, search_metadata: $searchMetadata, simple: $blocks, xlsx_export: $xlsxExport) {
+    advanced_search(search_strings: $query,
+       category: $category, 
+       adopted: $adopted, 
+       etymology: $etymology, 
+       mode: $mode, 
+       languages: $langs, 
+       dicts_to_filter: $dicts,
+        search_metadata: $searchMetadata,
+         simple: $blocks, 
+         xlsx_export: $xlsxExport) {
       dictionaries {
         id
         parent_id
@@ -85,12 +98,19 @@ const dropdownStyle = {
 };
 const test2 = (props) => {
   const {
-    languagesTree, dictionaries, perspectives, isAuthenticated, languages, location, data: { select_tags_metadata: metaTags }
+    languagesTree, dictionaries, perspectives, isAuthenticated, languages, location, data: { select_tags_metadata: metaTags }, client
   } = props;
+
+  const [perspect, setPerspectives] = useState(perspectives);
+  const [dictionariesFilter, setDictionary] = useState(dictionaries);
+  console.log('perspect', perspect);
+  console.log('dict', dictionariesFilter);
 
   const tree = assignDictsToTree(
     buildDictTrees(fromJS({
       lexical_entries: [],
+      /* perspectives: perspect,
+      dictionaries: dictionariesFilter, */
       perspectives,
       dictionaries,
     })),
@@ -106,7 +126,7 @@ const test2 = (props) => {
 
   const langToFilter = languages.map(lang => lang.id);
 
-  console.log(langToFilter)
+
   const hasAudioOptions = builderOptions(metaTags.hasAudio);
   const nativeSpeakersCountOptions = builderOptions(metaTags.nativeSpeakersCount);
   const dataSoursOptions = builderOptions(metaTags.kind);
@@ -120,21 +140,45 @@ const test2 = (props) => {
   const [kind, setKind] = useState(null);
   const [years, setYears] = useState(null);
   const [humanSettlement, setHumanSettlement] = useState(null);
-  const [authors, setAuthors] = useState(null);
+  const [authors, setAuthors] = useState([]);
+
   let searchMetadata = {};
 
-  function builderQuery() {
+  async function builderQuery() {
     searchMetadata = {};
     setOpen(false);
     searchMetadata = {
       hasAudio,
       nativeSpeakersCount,
       kind,
-      years,
-      humanSettlement,
+      years: [years],
+      humanSettlement: [humanSettlement],
       authors
     };
-    console.log(searchMetadata);
+
+    const { data } = await client.query({
+      query: searchQuery,
+      variables: {
+        query: [],
+        mode: 'published',
+        langs: langToFilter,
+        dicts: dictisToFilter,
+        searchMetadata,
+        blocks: false,
+        xlsxExport: false
+      },
+    });
+    const newPerspectives = data.advanced_search.dictionaries;
+    const newDictionary = data.advanced_search.perspectives;
+    console.log(perspect);
+    setPerspectives(fromJS(newPerspectives));
+    const localDict = fromJS(newDictionary)
+    const isDownloaded = dict => !!dictionaries.find(d => d.get('id').equals(dict.get('id')));
+    const dicts = localDict.reduce(
+      (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
+      new Map()
+    );
+    setDictionary(dicts);
   }
   function fieldCleaner() {
     setOpen(false);
@@ -238,5 +282,4 @@ const test2 = (props) => {
 };
 
 
-export default graphql(select_tags_metadata)(test2);
-
+export default compose(graphql(select_tags_metadata), withApollo)(test2);

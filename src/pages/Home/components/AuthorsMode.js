@@ -128,7 +128,10 @@ class AuthorsDicts extends React.Component {
 
     dicts = dictionaries;
     if (this.selectedAuthor.length !== 0 || this.startDate || this.endDate) {
+      
       const dictsSource = fromJS(this.state.arrayDictionary);
+    
+
       const localDicts = fromJS(dictionaries);
       const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
       dicts = dictsSource.reduce(
@@ -136,7 +139,8 @@ class AuthorsDicts extends React.Component {
         new Map()
       );
     }
-
+console.log('dictionaries',dictionaries)
+console.log('dicts',dicts)
     const tree = assignDictsToTree(
       buildDictTrees(fromJS({
         lexical_entries: [],

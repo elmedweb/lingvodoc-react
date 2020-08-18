@@ -5,7 +5,7 @@ import { compose } from 'recompose';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { getNodeValue } from '../../../components/Search/AdditionalFilter/Languages/helpers';
-import { fromJS } from 'immutable';
+import { fromJS, Map } from 'immutable';
 import Placeholder from 'components/Placeholder';
 import { assignDictsToTree, buildDictTrees, buildLanguageTree } from 'pages/Search/treeBuilder';
 import LangsNav from 'pages/Home/components/LangsNav';
@@ -46,9 +46,14 @@ const searchQuery = gql`
         id
         parent_id
         translation
+        status
         additional_metadata {
           location
-          blobs
+          authors
+        }
+        perspectives {
+          id
+          translation
         }
       }
       perspectives {
@@ -101,21 +106,9 @@ const test2 = (props) => {
     languagesTree, dictionaries, perspectives, isAuthenticated, languages, location, data: { select_tags_metadata: metaTags }, client
   } = props;
 
-  const [perspect, setPerspectives] = useState(perspectives);
-  const [dictionariesFilter, setDictionary] = useState(dictionaries);
-  console.log('perspect', perspect);
-  console.log('dict', dictionariesFilter);
 
-  const tree = assignDictsToTree(
-    buildDictTrees(fromJS({
-      lexical_entries: [],
-      /* perspectives: perspect,
-      dictionaries: dictionariesFilter, */
-      perspectives,
-      dictionaries,
-    })),
-    languagesTree
-  );
+  const [dictionariesFilter, setDictionariesFilter] = useState(dictionaries);
+
 
   function builderOptions(arg) {
     return arg.map((el, index) => ({ key: index, value: el.toString(), text: el.toString() }));
@@ -168,17 +161,17 @@ const test2 = (props) => {
         xlsxExport: false
       },
     });
-    const newPerspectives = data.advanced_search.dictionaries;
-    const newDictionary = data.advanced_search.perspectives;
-    console.log(perspect);
-    setPerspectives(fromJS(newPerspectives));
-    const localDict = fromJS(newDictionary)
-    const isDownloaded = dict => !!dictionaries.find(d => d.get('id').equals(dict.get('id')));
-    const dicts = localDict.reduce(
+    const newDictionary = data.advanced_search.dictionaries;
+
+    const dictsSource = fromJS(newDictionary);
+    const localDicts = fromJS(dictionaries);
+    const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
+    const dictionariesFilter1 = dictsSource.reduce(
       (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
       new Map()
     );
-    setDictionary(dicts);
+    setDictionariesFilter(dictionariesFilter1)
+    console.log(newDictionary)
   }
   function fieldCleaner() {
     setOpen(false);
@@ -189,6 +182,15 @@ const test2 = (props) => {
     setHumanSettlement(null);
     setAuthors(null);
   }
+
+  const tree = assignDictsToTree(
+    buildDictTrees(fromJS({
+      lexical_entries: [],
+      perspectives,
+      dictionaries: dictionariesFilter,
+    })),
+    languagesTree
+  );
   return (
     <div>
       <Modal

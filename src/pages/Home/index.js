@@ -20,7 +20,7 @@ import AllDicts from './components/AllDicts';
 import Placeholder from 'components/Placeholder';
 import DateModifDict from './components/DateModifDict';
 import DateCreateDict from './components/DateCreateDict';
-import AuthorsMode from './components/AuthorsMode';
+import AuthorsMode from './components/AuthorsDict';
 import MetaTagsDict from './components/MetaTagsDict';
 import { getScrollContainer } from './common';
 import { getTranslation } from 'api/i18n';

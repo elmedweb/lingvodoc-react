@@ -10,7 +10,7 @@ import Immutable, { fromJS, Map } from 'immutable';
 import { Container, Form, Radio, Segment, Button } from 'semantic-ui-react';
 
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
-import { setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode } from 'ducks/home';
+import { setSelectLanguagesMode, setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode } from 'ducks/home';
 
 import config from 'config';
 
@@ -22,6 +22,7 @@ import DateModifDict from './components/DateModifDict';
 import DateCreateDict from './components/DateCreateDict';
 import AuthorsMode from './components/AuthorsDict';
 import MetaTagsDict from './components/MetaTagsDict';
+import LangsMode from './components/LangsDict';
 import { getScrollContainer } from './common';
 import { getTranslation } from 'api/i18n';
 import './published.scss';
@@ -233,7 +234,7 @@ const Home = (props) => {
                 onChange={() => actions.setModifDateMode('modifDateMode')}
               />
               <Form.Field
-                label={{ children: <div className="toggle-label">{getTranslation("By Create date")}</div> }}
+                label={{ children: <div className="toggle-label">{getTranslation('By Create date')}</div> }}
                 control={Radio}
                 value="createDateMode"
                 checked={selectMode === 'createDateMode'}
@@ -259,6 +260,13 @@ const Home = (props) => {
                 value="metaTagsMode"
                 checked={selectMode === 'metaTagsMode'}
                 onChange={() => actions.setMetaTagsMode('metaTagsMode')}
+              />
+              <Form.Field
+                control={Radio}
+                label={{ children: <div className="toggle-label">{getTranslation('By select languages')}</div> }}
+                value="langsMode"
+                checked={selectMode === 'langsMode'}
+                onChange={() => actions.setSelectLanguagesMode('langsMode')}
               />
             </Segment>
           </Form.Group>
@@ -331,6 +339,19 @@ const Home = (props) => {
         {
           selectMode === 'metaTagsMode' && (
             <MetaTagsDict
+              location={props.location}
+              languagesTree={languagesTree}
+              languages={languages}
+              dictionaries={dicts}
+              perspectives={perspectivesList}
+              isAuthenticated={isAuthenticated}
+              dictsSource={dictsSource}
+            />
+          )
+        }
+        {
+          selectMode === 'langsMode' && (
+            <LangsMode
               location={props.location}
               languagesTree={languagesTree}
               languages={languages}
@@ -449,7 +470,7 @@ const AuthWrapper = ({
       state => ({ ...state.home, ...state.router }),
       dispatch => ({
         actions: bindActionCreators({
-          setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode
+          setSelectLanguagesMode, setMetaTagsMode, setGrantsMode, setLanguagesMode, setDictionariesMode, resetDictionaries, setModifDateMode, setAuthorsMode, setCreateDateMode
         }, dispatch)
       })
     ),

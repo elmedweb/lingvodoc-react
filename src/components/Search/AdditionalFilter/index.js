@@ -524,6 +524,10 @@ class AdditionalFilter extends PureComponent {
       languageVulnerability, isDataDefault, grammaticalSigns,
     } = this.state;
     const closeText = getTranslation('Close');
+console.log('languages',languages)
+console.log('this.state.showSearchSelectLanguages',this.state.showSearchSelectLanguages)
+console.log('checkAllButtonText',checkAllButtonText)
+console.log('uncheckAllButtonText',uncheckAllButtonText)
 
     return (
       <div className={classNames.container}>

@@ -16,14 +16,13 @@ const metadataQuery = gql`
 `;
 
 class AllDicts extends React.Component {
-  constructor(props) {
-    super(props);
-  }
   static isFieldLanguageVulnerability(name) {
     return name === 'languageVulnerability';
   }
-
-
+  // eslint-disable-next-line no-useless-constructor
+  constructor(props) {
+    super(props);
+  }
   render() {
     const {
       languagesTree, dictionaries, perspectives, isAuthenticated, location

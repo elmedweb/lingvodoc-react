@@ -1,94 +1,88 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Button, Header, Dropdown, Modal } from 'semantic-ui-react';
-import { newSearch, deleteSearch, storeSearchResult, newSearchWithAdditionalFields } from 'ducks/search';
 import { compose } from 'recompose';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import { getNodeValue } from '../../../components/Search/AdditionalFilter/Languages/helpers';
-import { fromJS, Map } from 'immutable';
-import Placeholder from 'components/Placeholder';
-import { assignDictsToTree, buildDictTrees, buildLanguageTree } from 'pages/Search/treeBuilder';
-import LangsNav from 'pages/Home/components/LangsNav';
+import Immutable, { fromJS, Map } from 'immutable';
+import { assignDictsToTree, buildDictTrees } from 'pages/Search/treeBuilder';
 import Tree from './Tree';
-import QueryBuilder from 'components/Search/QueryBuilder';
-import { connect } from 'react-redux';
-import { compositeIdToString as id2str } from 'utils/compositeId';
-import { bindActionCreators } from 'redux';
+import { getTranslation } from 'api/i18n';
 
-const select_tags_metadata = gql`query select_tags_metadata{
+
+const selectTagsMetadata = gql`query select_tags_metadata{
   select_tags_metadata
 }`;
 
 
 const searchQuery = gql`
   query Search($query: [[ObjectVal]]!,
-     $category: Int,
-      $adopted: Boolean, 
-      $etymology: Boolean,
-       $mode: String,
-        $langs: [LingvodocID],
-         $dicts: [LingvodocID],
-          $searchMetadata: ObjectVal,
-           $blocks: Boolean, 
-           $xlsxExport: Boolean) 
-           {
-    advanced_search(search_strings: $query,
-       category: $category, 
-       adopted: $adopted, 
-       etymology: $etymology, 
-       mode: $mode, 
-       languages: $langs, 
-       dicts_to_filter: $dicts,
-        search_metadata: $searchMetadata,
-         simple: $blocks, 
-         xlsx_export: $xlsxExport) {
-      dictionaries {
+    $category: Int,
+    $adopted: Boolean, 
+    $etymology: Boolean,
+    $mode: String,
+    $langs: [LingvodocID],
+    $dicts: [LingvodocID],
+    $searchMetadata: ObjectVal,
+    $blocks: Boolean, 
+    $xlsxExport: Boolean) 
+  {   advanced_search(search_strings: $query,
+      category: $category, 
+      adopted: $adopted, 
+      etymology: $etymology, 
+      mode: $mode, 
+      languages: $langs, 
+      dicts_to_filter: $dicts,
+      search_metadata: $searchMetadata,
+      simple: $blocks, 
+      xlsx_export: $xlsxExport) {
+        dictionaries {
         id
         parent_id
         translation
         status
         additional_metadata {
-          location
-          authors
+            location
+            authors
         }
         perspectives {
-          id
-          translation
-        }
+            id
+            translation
+          }
       }
-      perspectives {
-        id
-        parent_id
-        translation
-        additional_metadata {
-          location
-        }
-        tree {
-          id
-          translation
-        }
-      }
-      lexical_entries {
-        id
-        parent_id
-        entities(mode: $mode) {
+        perspectives {
           id
           parent_id
-          field_id
-          link_id
-          self_id
-          created_at
-          locale_id
-          content
-          published
-          accepted
+          translation
+          additional_metadata {
+            location
+          }
+          tree {
+              id
+              translation
+          }
         }
+        lexical_entries {
+          id
+          parent_id
+          entities(mode: $mode) {
+            id
+            parent_id
+            field_id
+            link_id
+            self_id
+            created_at
+            locale_id
+            content
+            published
+            accepted
+          }
+        }
+        entities {
+          id
+        }
+        xlsx_url
       }
-      entities {
-        id
-      }
-      xlsx_url
-    }
     language_tree {
       id
       parent_id
@@ -101,11 +95,22 @@ const searchQuery = gql`
 const dropdownStyle = {
   margin: '20px 0'
 };
-const test2 = (props) => {
-  const {
-    languagesTree, dictionaries, perspectives, isAuthenticated, languages, location, data: { select_tags_metadata: metaTags }, client
-  } = props;
+const modalStyle = {
+  margin: '0 0 20px 0'
+};
 
+
+const metaTagsSelector = (props) => {
+  const {
+    languagesTree,
+    dictionaries,
+    perspectives,
+    isAuthenticated,
+    languages,
+    location,
+    data: { select_tags_metadata: metaTags },
+    client
+  } = props;
 
   const [dictionariesFilter, setDictionariesFilter] = useState(dictionaries);
 
@@ -113,12 +118,12 @@ const test2 = (props) => {
   function builderOptions(arg) {
     return arg.map((el, index) => ({ key: index, value: el.toString(), text: el.toString() }));
   }
+
   const dictLocal = dictionaries.toJS();
 
-  const dictisToFilter = Object.entries(dictLocal).map(([key, value]) => value.id);
+  const dictisToFilter = Object.entries(dictLocal).map(([, value]) => value.id);
 
   const langToFilter = languages.map(lang => lang.id);
-
 
   const hasAudioOptions = builderOptions(metaTags.hasAudio);
   const nativeSpeakersCountOptions = builderOptions(metaTags.nativeSpeakersCount);
@@ -129,23 +134,23 @@ const test2 = (props) => {
 
   const [open, setOpen] = React.useState(false);
   const [hasAudio, setHasAudio] = useState(null);
-  const [nativeSpeakersCount, setNativeSpeakersCount] = useState(null);
+  const [nativeSpeakersCount, setNativeSpeakersCount] = useState([]);
   const [kind, setKind] = useState(null);
-  const [years, setYears] = useState(null);
-  const [humanSettlement, setHumanSettlement] = useState(null);
+  const [years, setYears] = useState([]);
+  const [humanSettlement, setHumanSettlement] = useState([]);
   const [authors, setAuthors] = useState([]);
 
   let searchMetadata = {};
 
-  async function builderQuery() {
+  async function requestNewDictionaries() {
     searchMetadata = {};
     setOpen(false);
     searchMetadata = {
       hasAudio,
       nativeSpeakersCount,
       kind,
-      years: [years],
-      humanSettlement: [humanSettlement],
+      years,
+      humanSettlement,
       authors
     };
 
@@ -161,18 +166,18 @@ const test2 = (props) => {
         xlsxExport: false
       },
     });
-    const newDictionary = data.advanced_search.dictionaries;
+    const newDictionaries = data.advanced_search.dictionaries;
 
-    const dictsSource = fromJS(newDictionary);
+    const dictsSource = fromJS(newDictionaries);
     const localDicts = fromJS(dictionaries);
     const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
     const dictionariesFilter1 = dictsSource.reduce(
       (acc, dict) => acc.set(dict.get('id'), dict.set('isDownloaded', isDownloaded(dict))),
       new Map()
     );
-    setDictionariesFilter(dictionariesFilter1)
-    console.log(newDictionary)
+    setDictionariesFilter(dictionariesFilter1);
   }
+
   function fieldCleaner() {
     setOpen(false);
     setHasAudio(null);
@@ -191,20 +196,21 @@ const test2 = (props) => {
     })),
     languagesTree
   );
+
   return (
     <div>
       <Modal
         onClose={() => setOpen(false)}
         onOpen={() => setOpen(true)}
         open={open}
-        trigger={<Button>Show Modal</Button>}
+        trigger={<Button style={modalStyle} fluid positive className="modal_select_tags" >{getTranslation('Select tags to search')}</Button>}
       >
-        <Modal.Header>Выберите теги для поиска</Modal.Header>
+        <Modal.Header> {getTranslation('Select tags to search')}</Modal.Header>
         <Modal.Content >
           <Modal.Description>
-            <Header>Теги</Header>
+            <Header>{getTranslation('Tags')}</Header>
             <Dropdown
-              placeholder="Audio"
+              placeholder={getTranslation('Audio')}
               fluid
               search
               selection
@@ -214,9 +220,10 @@ const test2 = (props) => {
             />
             <Dropdown
               style={dropdownStyle}
-              placeholder="Language degree of endangerment"
+              placeholder={getTranslation('Language degree of endangerment')}
               fluid
               search
+              multiple
               selection
               value={nativeSpeakersCount}
               options={nativeSpeakersCountOptions}
@@ -224,7 +231,7 @@ const test2 = (props) => {
             />
             <Dropdown
               style={dropdownStyle}
-              placeholder="Data sourcet"
+              placeholder={getTranslation('Data sourcet')}
               fluid
               search
               selection
@@ -234,7 +241,8 @@ const test2 = (props) => {
             />
             <Dropdown
               style={dropdownStyle}
-              placeholder="Years"
+              placeholder={getTranslation('Years')}
+              multiple
               fluid
               search
               selection
@@ -245,7 +253,8 @@ const test2 = (props) => {
 
             <Dropdown
               style={dropdownStyle}
-              placeholder="Settlement"
+              placeholder={getTranslation('Settlement')}
+              multiple
               fluid
               search
               selection
@@ -255,7 +264,8 @@ const test2 = (props) => {
             />
             <Dropdown
               style={dropdownStyle}
-              placeholder="Authors"
+              placeholder={getTranslation('Authors')}
+              multiple
               fluid
               search
               selection
@@ -266,14 +276,14 @@ const test2 = (props) => {
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="black" onClick={() => fieldCleaner()}>
-            Nope
-          </Button>
           <Button
-            content="Yep, that's me"
-            labelPosition="right"
-            icon="checkmark"
-            onClick={() => builderQuery()}
+            color="black"
+            onClick={() => fieldCleaner()}
+            content={getTranslation('Cancel')}
+          />
+          <Button
+            content={getTranslation('Ok')}
+            onClick={() => requestNewDictionaries()}
             positive
           />
         </Modal.Actions>
@@ -283,5 +293,22 @@ const test2 = (props) => {
   );
 };
 
-
-export default compose(graphql(select_tags_metadata), withApollo)(test2);
+metaTagsSelector.propTypes = {
+  location: PropTypes.object.isRequired,
+  languagesTree: PropTypes.instanceOf(Immutable.List).isRequired,
+  dictionaries: PropTypes.instanceOf(Immutable.Map).isRequired,
+  perspectives: PropTypes.instanceOf(Immutable.List).isRequired,
+  isAuthenticated: PropTypes.bool,
+  languages: PropTypes.array.isRequired,
+  client: PropTypes.object.isRequired,
+  data: PropTypes.shape({
+    metaTags: PropTypes.object.isRequired,
+  }),
+};
+metaTagsSelector.defaultProps = {
+  isAuthenticated: false,
+  data: PropTypes.shape({
+    metaTags: {}
+  })
+};
+export default compose(graphql(selectTagsMetadata), withApollo)(metaTagsSelector);

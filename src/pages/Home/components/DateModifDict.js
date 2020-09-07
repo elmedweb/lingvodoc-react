@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import Immutable, { fromJS, Map } from 'immutable';
 import { assignDictsToTree, buildDictTrees } from 'pages/Search/treeBuilder';
 import Tree from './Tree';
-import { Input } from 'semantic-ui-react';
+import { Input, Header, Button } from 'semantic-ui-react';
 import gql from 'graphql-tag';
 import { graphql, withApollo } from 'react-apollo';
 import { compose } from 'recompose';
+import { getTranslation } from 'api/i18n';
 
-let authorsList = [];
-let last_modified_at_Dictionary_mody = null;
+
 let dicts = null;
+const arrDictionaries = [];
+
+
 const metadataQuery = gql`
   query metadata {
     select_tags_metadata
@@ -35,69 +38,78 @@ query AuthDictionaries($id:LingvodocID!) {
 }
 `;
 
-class ModifDateDicts extends React.Component {
+class ModificatiedDictionariesDate extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      arrayDictionary: []
+      newListDictionaries: [],
+      inputDateStart: '',
+      inputDateEnd: ''
     };
 
     this.startDate = null;
     this.endDate = null;
     this.selectedAuthor = [];
-  }
-  static isFieldLanguageVulnerability(name) {
-    return name === 'languageVulnerability';
+    this.lastModifiedAtDictionary = null;
   }
 
-  requestData = (id_dictionary) => {
-    this.props.client.query({
+  requestData = (idDictionary) => {
+    const { client } = this.props;
+    client.query({
       query: AutorsName,
-      variables: { id: id_dictionary._tail.array }
+      variables: { id: idDictionary }
     }).then((result) => {
-      
-      authorsList.push(result.data.dictionary);
-      this.setState({ arrayDictionary: authorsList });
+      arrDictionaries.push(result.data.dictionary);
+      this.setState({ newListDictionaries: arrDictionaries });
     });
   }
 
 
-  handleChangeDate = (event) => {
-    if (event.currentTarget.offsetParent.className === 'ui big input startDate') {
-      this.startDate = event.currentTarget.valueAsNumber;
-    } else if (event.currentTarget.offsetParent.className === 'ui big input endDate') {
-      this.endDate = event.currentTarget.valueAsNumber;
+  handleChangeDate = (event, data) => {
+    let timestampNumber = null;
+    if (data.className === 'startDate date') {
+      timestampNumber = Number(new Date(data.value));
+      this.setState({ inputDateStart: data.value });
+      this.startDate = timestampNumber;
+    } else if (data.className === 'endDate date') {
+      timestampNumber = Number(new Date(data.value));
+      this.setState({ inputDateEnd: data.value });
+      this.endDate = timestampNumber;
     }
-
+  }
+  dateChangeHandler = () => {
     if (this.startDate || this.endDate) {
       this.props.dictionaries.map((dictionary) => {
-        const last_modified_at_Dictionary = dictionary.getIn(['last_modified_at']);
-        const id_dictionary = dictionary.getIn(['id']);
-        last_modified_at_Dictionary_mody = (new Date(Math.trunc(last_modified_at_Dictionary) * 1000)).setHours(0, 0, 0, 0);
+        const timestampLastModifiedDate = dictionary.getIn(['last_modified_at']);
+        const idDictionary = dictionary.getIn(['id']).toJS();
+        this.lastModifiedAtDictionary = (new Date(Math.trunc(timestampLastModifiedDate) * 1000)).setHours(0, 0, 0, 0);
 
-        if (last_modified_at_Dictionary_mody >= this.startDate && !this.endDate) {
-            this.requestData(id_dictionary);
-        } else if (last_modified_at_Dictionary_mody >= this.startDate && last_modified_at_Dictionary_mody <= this.endDate) {
-          this.requestData(id_dictionary);
-        } else if (last_modified_at_Dictionary_mody <= this.endDate && !this.startDate) {
-          this.requestData(id_dictionary);
+        if (this.lastModifiedAtDictionary >= this.startDate && !this.endDate) {
+          this.requestData(idDictionary);
+        } else if (this.lastModifiedAtDictionary >= this.startDate && this.lastModifiedAtDictionary <= this.endDate) {
+          this.requestData(idDictionary);
+        } else if (this.lastModifiedAtDictionary <= this.endDate && !this.startDate) {
+          this.requestData(idDictionary);
         } else {
-          this.setState({ arrayDictionary: [] });
+          this.setState({ newListDictionaries: [] });
         }
       });
     }
   }
-
-
+  clear = () => {
+    this.startDate = null;
+    this.endDate = null;
+    this.setState({ inputDateStart: '', inputDateEnd: '' });
+  }
   render() {
     const {
-      languagesTree, dictionaries, perspectives, isAuthenticated, location, data
+      languagesTree, dictionaries, perspectives, isAuthenticated, location
     } = this.props;
 
 
     dicts = dictionaries;
-    if ( this.startDate || this.endDate) {
-      const dictsSource = fromJS(this.state.arrayDictionary);
+    if (this.startDate || this.endDate) {
+      const dictsSource = fromJS(this.state.newListDictionaries);
       const localDicts = fromJS(dictionaries);
       const isDownloaded = dict => !!localDicts.find(d => d.get('id').equals(dict.get('id')));
       dicts = dictsSource.reduce(
@@ -117,32 +129,32 @@ class ModifDateDicts extends React.Component {
 
     return (
       <div>
-          <div className="selected_date">
-            <label className="labelDate">Selected start date</label>
-            <br />
-            <Input className="startDate" type="date" size="big" onBlur={this.handleChangeDate} />
-            <br />
-            <label className="labelDate">Selected end date</label>
-            <br />
-            <Input className="endDate" type="date" size="big" onBlur={this.handleChangeDate} />
-          </div>
-       
+        <div className="selected_date">
+          <Header className="labelDate">{getTranslation('Selected start date')}</Header>
+          <Input className="startDate date" value={this.state.inputDateStart} type="date" size="big" onChange={(event, data) => { this.handleChangeDate(event, data); }} />
+          <Header className="labelDate">{getTranslation('Selected end date')}</Header>
+          <Input className="endDate date" value={this.state.inputDateEnd} type="date" size="big" onChange={(event, data) => { this.handleChangeDate(event, data); }} />
+          <Button positive className="buttonOk" onClick={this.dateChangeHandler}>Ok</Button>
+          <Button className="buttonOk" onClick={this.clear}>{getTranslation('Clear')}</Button>
+        </div>
+
         <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
       </div>
     );
   }
 }
 
-ModifDateDicts.propTypes = {
+ModificatiedDictionariesDate.propTypes = {
   location: PropTypes.object.isRequired,
   languagesTree: PropTypes.instanceOf(Immutable.List).isRequired,
   dictionaries: PropTypes.instanceOf(Immutable.Map).isRequired,
   perspectives: PropTypes.instanceOf(Immutable.List).isRequired,
   isAuthenticated: PropTypes.bool,
+  client: PropTypes.object.isRequired
 };
 
-ModifDateDicts.defaultProps = {
+ModificatiedDictionariesDate.defaultProps = {
   isAuthenticated: false,
 };
 
-export default compose(graphql(metadataQuery), withApollo)(ModifDateDicts);
+export default compose(graphql(metadataQuery), withApollo)(ModificatiedDictionariesDate);

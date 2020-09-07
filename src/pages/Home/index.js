@@ -219,29 +219,26 @@ const Home = (props) => {
             <label>{getTranslation('Display mode')}</label>
             <Segment>
               <Form.Field
-                className="checkbox_radio"
-                control={Radio}
-                label="By Modification date"
-                value="modifDateMode"
-                checked={selectMode === 'modifDateMode'}
-                onChange={() => actions.setModifDateMode('modifDateMode')}
-              />
-              <Form.Field
-                className="checkbox_radio"
-                control={Radio}
-                label="By Create date"
-                value="createDateMode"
-                checked={selectMode === 'createDateMode'}
-                onChange={() => actions.setCreateDateMode('createDateMode')}
-              />
-              <Form.Field
                 control={Radio}
                 label={{ children: <div className="toggle-label">{getTranslation('By Languages')}</div> }}
                 value="languagesMode"
                 checked={selectMode === 'languagesMode'}
                 onChange={() => actions.setLanguagesMode('languagesMode')}
               />
-
+              <Form.Field
+                label={{ children: <div className="toggle-label">{getTranslation('By Modification date')}</div> }}
+                control={Radio}
+                value="modifDateMode"
+                checked={selectMode === 'modifDateMode'}
+                onChange={() => actions.setModifDateMode('modifDateMode')}
+              />
+              <Form.Field
+                label={{ children: <div className="toggle-label">{getTranslation("By Create date")}</div> }}
+                control={Radio}
+                value="createDateMode"
+                checked={selectMode === 'createDateMode'}
+                onChange={() => actions.setCreateDateMode('createDateMode')}
+              />
               <Form.Field
                 control={Radio}
                 label={{ children: <div className="toggle-label">{getTranslation('By Grants')}</div> }}

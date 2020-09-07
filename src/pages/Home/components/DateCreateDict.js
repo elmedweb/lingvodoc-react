@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import Immutable, { fromJS, Map } from 'immutable';
 import { assignDictsToTree, buildDictTrees } from 'pages/Search/treeBuilder';
 import Tree from './Tree';
-import { Input, Label, Placeholder } from 'semantic-ui-react';
+import { Input, Header, Button } from 'semantic-ui-react';
 import gql from 'graphql-tag';
 import { graphql, withApollo } from 'react-apollo';
 import { compose } from 'recompose';
+import { getTranslation } from 'api/i18n';
 
-
-let createAtDictionaryMody = null;
 let dicts = null;
 const arrayDictionaries = [];
 
@@ -38,20 +37,19 @@ query createDate($id:LingvodocID!) {
 }
 `;
 
-class ModifDateDicts extends React.Component {
+class CreatedDateDictionaries extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       newListDictionaries: [],
-      statusResponse: true
+      inputDateStart: '',
+      inputDateEnd: ''
     };
     this.startDate = null;
     this.endDate = null;
     this.selectedAuthor = [];
-    this.test = this.test.bind(this)
-  }
-  componentDidUpdate() {
-    this.test();
+    this.dateChangeHandler = this.dateChangeHandler.bind(this);
+    this.createdAtDictionary = null;
   }
 
   requestData = (idDictionary) => {
@@ -65,42 +63,55 @@ class ModifDateDicts extends React.Component {
     });
   }
 
-  test = () => {
+  dateChangeHandler = () => {
     if (this.startDate || this.endDate) {
       this.props.dictionaries.forEach((dictionary) => {
         const createAtDictionary = dictionary.getIn(['created_at']);
         const idDictionary = dictionary.getIn(['id']).toJS();
 
-        createAtDictionaryMody = (new Date(Math.trunc(createAtDictionary) * 1000)).setHours(0, 0, 0, 0);
+        this.createdAtDictionary = (new Date(Math.trunc(createAtDictionary) * 1000)).setHours(0, 0, 0, 0);
 
-        if (createAtDictionaryMody >= this.startDate && !this.endDate) {
+        if (this.createdAtDictionary >= this.startDate && !this.endDate) {
           this.requestData(idDictionary);
-        } else if (createAtDictionaryMody >= this.startDate && createAtDictionaryMody <= this.endDate) {
+        } else
+
+        if (this.createdAtDictionary >= this.startDate && this.createdAtDictionary <= this.endDate) {
           this.requestData(idDictionary);
-        } else if (createAtDictionaryMody <= this.endDate && !this.startDate) {
+        } else
+
+        if (this.createdAtDictionary <= this.endDate && !this.startDate) {
           this.requestData(idDictionary);
         } else {
-         /*  return this.setState({ newListDictionaries: [] }); */
+          return this.setState({ newListDictionaries: [] });
         }
       });
-      console.log('wdadsaa');
-    }
-  }
-  handleChangeDate = (event) => {
-    this.setState({ statusResponse: false });
-    if (event.currentTarget.offsetParent.className === 'ui big input startDate') {
-      this.startDate = event.currentTarget.valueAsNumber;
-    } else if (event.currentTarget.offsetParent.className === 'ui big input endDate') {
-      this.endDate = event.currentTarget.valueAsNumber;
     }
   }
 
+
+  handleChangeDate = (event, data) => {
+    let timestampNumber = null;
+    if (data.className === 'startDate date') {
+      timestampNumber = Number(new Date(data.value));
+      this.setState({ inputDateStart: data.value });
+      this.startDate = timestampNumber;
+    } else if (data.className === 'endDate date') {
+      timestampNumber = Number(new Date(data.value));
+      this.setState({ inputDateEnd: data.value });
+      this.endDate = timestampNumber;
+    }
+  }
+  clear = () => {
+    this.startDate = null;
+    this.endDate = null;
+    this.setState({ inputDateStart: '', inputDateEnd: '' });
+  }
 
   render() {
     const {
       languagesTree, dictionaries, perspectives, isAuthenticated, location
     } = this.props;
-    console.log(this.state.statusResponse);
+
     dicts = dictionaries;
 
     if (this.startDate || this.endDate) {
@@ -112,6 +123,8 @@ class ModifDateDicts extends React.Component {
         new Map()
       );
     }
+
+
     const tree = assignDictsToTree(
       buildDictTrees(fromJS({
         lexical_entries: [],
@@ -124,32 +137,20 @@ class ModifDateDicts extends React.Component {
     return (
       <div>
         <div className="selected_date">
-          <Label className="labelDate">Selected start date</Label>
-          <br />
-          <Input className="startDate" type="date" size="big" onBlur={this.handleChangeDate} />
-          <br />
-          <Label className="labelDate">Selected end date</Label>
-          <br />
-          <Input className="endDate" type="date" size="big" onBlur={this.handleChangeDate} />
+          <Header className="labelDate text">{getTranslation('Selected start date')}</Header>
+          <Input value={this.state.inputDateStart} className="startDate date" type="date" size="big" onChange={(event, data) => { this.handleChangeDate(event, data); }} />
+          <Header className="labelDate text">{getTranslation('Selected end date')}</Header>
+          <Input value={this.state.inputDateEnd} className="endDate date" type="date" size="big" onChange={(event, data) => { this.handleChangeDate(event, data); }} />
+          <Button positive className="buttonOk" onClick={this.dateChangeHandler}>Ok</Button>
+          <Button className="buttonOk" onClick={this.clear}>{getTranslation('Clear')}</Button>
         </div>
-        {(this.state.statusResponse) && (
-          <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
-        )}
-        {(!this.state.statusResponse) && (
-          <Placeholder>
-            <Placeholder.Line />
-            <Placeholder.Line />
-            <Placeholder.Line />
-            <Placeholder.Line />
-            <Placeholder.Line />
-          </Placeholder>
-        )}
+        <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
       </div>
     );
   }
 }
 
-ModifDateDicts.propTypes = {
+CreatedDateDictionaries.propTypes = {
   location: PropTypes.object.isRequired,
   languagesTree: PropTypes.instanceOf(Immutable.List).isRequired,
   dictionaries: PropTypes.instanceOf(Immutable.Map).isRequired,
@@ -158,8 +159,8 @@ ModifDateDicts.propTypes = {
   client: PropTypes.object.isRequired
 };
 
-ModifDateDicts.defaultProps = {
+CreatedDateDictionaries.defaultProps = {
   isAuthenticated: false,
 };
 
-export default compose(graphql(metadataQuery), withApollo)(ModifDateDicts);
+export default compose(graphql(metadataQuery), withApollo)(CreatedDateDictionaries);

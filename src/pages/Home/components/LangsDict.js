@@ -16,7 +16,29 @@ const metadataQuery = gql`
 `;
 
 class AllDicts extends React.Component {
-  // eslint-disable-next-line no-useless-constructor
+  /*  static getAllNodesValues(languagesTree, result) {
+    console.log('languagesTree1', languagesTree);
+    if (!result) {
+      result = {
+        languages: [],
+        dictionaries: [],
+      };
+    }
+    languagesTree.forEach((item) => {
+      const isLanguage = !!item.dictionaries;
+      const type = isLanguage ? 'languages' : 'dictionaries';
+
+      result[type].push([item.id[0], item.id[1]]);
+
+      if (isLanguage && item.dictionaries.length > 0) {
+        item.dictionaries.forEach(dictionary => result.dictionaries.push([dictionary.id[0], dictionary.id[1]]));
+      }
+
+      this.getAllNodesValues(item.children, result);
+    });
+
+    return result;
+  } */
   constructor(props) {
     super(props);
   }
@@ -28,6 +50,8 @@ class AllDicts extends React.Component {
       languages, languagesTree, dictionaries, perspectives, isAuthenticated, location
     } = this.props;
     const langToFilter = languages.map(lang => lang.id);
+    const dictLocal = dictionaries.toJS();
+    const dictisToFilter = Object.entries(dictLocal).map(([, value]) => value.id);
     const tree = assignDictsToTree(
       buildDictTrees(fromJS({
         lexical_entries: [],
@@ -36,19 +60,21 @@ class AllDicts extends React.Component {
       })),
       languagesTree
     );
-
+    const localLangTree = languagesTree.toJS();
+    const test666=localLangTree.splice(0, 3)
+    console.log('languagesTree.toJS()',test666 );
     return (
       <div>
-      {/*   <Languages
-          onChange={this.onLangsDictsChange}
-          languagesTree={languagesTree}
+             <Languages
+          onChange={this.test}
+          languagesTree={test666}
           langsChecked={langToFilter}
-          dictsChecked={dictionaries}
+          dictsChecked={dictisToFilter}
           showTree={true}
           filterMode
           checkAllButtonText={"Check all"}
           uncheckAllButtonText={"Uncheck all"}
-        /> */}
+        />
 
         <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
       </div>

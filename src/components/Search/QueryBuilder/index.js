@@ -4,7 +4,6 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router'
 import { graphql } from 'react-apollo';
-import { Link } from 'react-router-dom';
 import gql from 'graphql-tag';
 import { compose, pure } from 'recompose';
 import { List, fromJS } from 'immutable';
@@ -113,6 +112,14 @@ const fieldsQuery = gql`
   }
 `;
 
+function utf8_to_b64(str) {
+  return window.btoa(unescape(encodeURIComponent(str)));
+}
+
+function b64_to_utf8(str) {
+  return decodeURIComponent(escape(window.atob(str)));
+}
+
 function Query({
   data, query, onFieldChange, onDelete,
 }) {
@@ -212,9 +219,11 @@ class QueryBuilder extends React.Component {
     let humanSettlement = [];
     let authors = [];
 
+
     if (this.props.location.hash) {
-      let hashJSON = decodeURI(this.props.location.hash.slice(1))
-      let hashObj = JSON.parse(hashJSON);
+      let hashJSON = decodeURI(this.props.location.hash.slice(1));
+      let stringUTF8 = b64_to_utf8(hashJSON);
+      let hashObj = JSON.parse(stringUTF8);
       let hashArray = Object.keys(hashObj).map(key => hashObj[key])
 
       actions.setQuery(...hashArray);
@@ -359,7 +368,8 @@ class QueryBuilder extends React.Component {
       xlsxExport
     }
 
-    history.pushState(null, null, '#' + JSON.stringify(hashObj))
+    const stringSearchB64 = utf8_to_b64(JSON.stringify(hashObj));
+    history.pushState(null, null, '#' + stringSearchB64)
   }
 
   getBlocksText() {

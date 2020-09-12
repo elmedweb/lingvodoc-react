@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Immutable, { fromJS } from 'immutable';
@@ -8,6 +9,7 @@ import gql from 'graphql-tag';
 import { graphql, withApollo } from 'react-apollo';
 import { compose } from 'recompose';
 import Languages from 'components/Search/AdditionalFilter/Languages';
+import { Checkbox } from 'semantic-ui-react';
 
 const metadataQuery = gql`
   query metadata {
@@ -41,10 +43,28 @@ class AllDicts extends React.Component {
   } */
   constructor(props) {
     super(props);
+
+    const localLangTree = props.languagesTree.toJS();
+    const test666 = localLangTree.filter((element) => {
+      if (element.children.length > 0) return true;
+    });
+
+    this.state = {
+      langsState: test666
+    };
+    this.test3 =test666;
   }
-  test=(e) => {
-    console.log(e);
-  }
+
+
+  test5 = (elm) => {
+    if (elm.length === 0) {
+      return;
+    }
+   
+    console.log('elm', elm);
+    console.log('langsState', this.state.langsState);
+    this.setState({ langsState: elm });
+  };
   render() {
     const {
       languages, languagesTree, dictionaries, perspectives, isAuthenticated, location
@@ -61,20 +81,26 @@ class AllDicts extends React.Component {
       languagesTree
     );
     const localLangTree = languagesTree.toJS();
-    const test666=localLangTree.splice(0, 3)
-    console.log('languagesTree.toJS()',test666 );
+    const test666 = localLangTree.filter((element) => {
+      if (element.children.length > 0) return true;
+    });
+
+    console.log('test666', test666);
+
     return (
       <div>
-             <Languages
-          onChange={this.test}
-          languagesTree={test666}
-          langsChecked={langToFilter}
-          dictsChecked={dictisToFilter}
-          showTree={true}
-          filterMode
-          checkAllButtonText={"Check all"}
-          uncheckAllButtonText={"Uncheck all"}
-        />
+        <ul>
+    {this.test3.map(el => <div>{el.translation}</div> )}
+          {this.state.langsState.map(text =>
+            <li key={text.id.join('_')}>
+              <Checkbox />
+              <button onClick={() => {
+                this.test5(text.children);
+              }}
+              >{text.translation}
+              </button>
+            </li>)}
+        </ul>
 
         <Tree tree={tree} canSelectDictionaries={isAuthenticated} location={location} />
       </div>

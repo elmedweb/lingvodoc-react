@@ -143,7 +143,6 @@ class AdditionalFilter extends PureComponent {
 
   constructor(props) {
     super();
-
     const rawLanguagesTree = buildLanguageTree(fromJS(props.languagesQuery.language_tree)).toJS();
 
     const {
@@ -350,6 +349,7 @@ class AdditionalFilter extends PureComponent {
     }
 
     this.setState(state);
+
     this.props.onChange(dataToSendToTop);
   }
 
@@ -641,7 +641,6 @@ class AdditionalFilter extends PureComponent {
 const AdditionalFilterWrap = (props) => {
   const { languagesQuery } = props;
   const { error: languagesQueryError, loading: languagesQueryLoading } = languagesQuery;
-
   if (languagesQueryError) {
     return null;
   }

@@ -91,7 +91,7 @@ const initialState = {
 };
 
 
-const searches = (state = [initialState], action) => {
+const searches = (state = [initialState], action) => {  
   switch (action.type) {
     case NEW_SEARCH:
       return [...state, buildNewQuery()];

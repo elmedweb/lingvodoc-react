@@ -295,13 +295,14 @@ class QueryBuilder extends React.Component {
   }
 
   onSearchButtonClick() {
+
     const { searchId, actions } = this.props;
     const {
       languages: langsToFilter, dictionaries: dictsToFilter,
       hasAudio, kind, years, humanSettlement, authors,
       grammaticalSigns, languageVulnerability,
     } = this.additionalFields;
-
+    console.log('onSearchButtonClick', this.props)
     const adopted = mode2bool(this.state.mode.adopted);
     const etymology = mode2bool(this.state.mode.etymology);
     const category = bool2category(this.state.source.dictionaries, this.state.source.corpora);
@@ -313,6 +314,7 @@ class QueryBuilder extends React.Component {
       humanSettlement,
       authors,
     };
+
     const query = this.addGrammaticalSigns(this.state.data.toJS());
 
     actions.setQuery(
@@ -357,7 +359,6 @@ class QueryBuilder extends React.Component {
     }
 
     const addGrammaticalSigns = [];
-
     grammaticalGroupNames.forEach((name) => {
       const values = Object.values(grammaticalSigns[name]);
 
@@ -546,22 +547,22 @@ class QueryBuilder extends React.Component {
         </Segment.Group>
         <Wrapper>
           {blocks.flatMap((subBlocks, id) =>
-          List.of(
-            <SearchBlock
-              key={`s_${id}`}
-              data={subBlocks}
-              subBlocksMode={subBlocksMode}
-              onFieldChange={this.onFieldChange(id)}
-              onAddInnerSearchBlock={this.onAddInnerSearchBlock(id)}
-              onDeleteInnerSearchBlock={this.onDeleteInnerSearchBlock(id)}
-              onDeleteSearchBlock={this.onDeleteSearchBlock(id)}
-            />,
-            <Divider key={`d_${id}`} horizontal>
-              { blocksText }
-            </Divider>
-          ))}
+            List.of(
+              <SearchBlock
+                key={`s_${id}`}
+                data={subBlocks}
+                subBlocksMode={subBlocksMode}
+                onFieldChange={this.onFieldChange(id)}
+                onAddInnerSearchBlock={this.onAddInnerSearchBlock(id)}
+                onDeleteInnerSearchBlock={this.onDeleteInnerSearchBlock(id)}
+                onDeleteSearchBlock={this.onDeleteSearchBlock(id)}
+              />,
+              <Divider key={`d_${id}`} horizontal>
+                {blocksText}
+              </Divider>
+            ))}
           <Button primary basic fluid onClick={this.onAddSearchBlock}>
-            Add { blocksText } block
+            Add {blocksText} block
           </Button>
 
           <Divider />
@@ -569,7 +570,7 @@ class QueryBuilder extends React.Component {
             Search
           </Button>
           <Checkbox
-            style={{marginLeft: '0.5em'}}
+            style={{ marginLeft: '0.5em' }}
             label="Export to XLSX"
             checked={this.state.xlsxExport}
             onChange={() =>

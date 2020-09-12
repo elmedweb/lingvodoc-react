@@ -6,25 +6,45 @@ import { Table } from 'semantic-ui-react';
 import Row from './Row';
 
 const TableBody = ({
-  perspectiveId, entitiesMode, entries, columns, mode, actions, selectEntries, selectedEntries, onEntrySelect,
-}) => (
-  <Table.Body>
-    {entries.map(entry => (
-      <Row
-        key={entry.id}
-        perspectiveId={perspectiveId}
-        entry={entry}
-        columns={columns}
-        mode={mode}
-        entitiesMode={entitiesMode}
-        actions={actions}
-        selectEntries={selectEntries}
-        selectedEntries={selectedEntries}
-        onEntrySelect={onEntrySelect}
-      />
-    ))}
-  </Table.Body>
-);
+  perspectiveId,
+  entitiesMode,
+  entries,
+  columns,
+  mode,
+  actions,
+  selectEntries,
+  selectedEntries,
+  onEntrySelect,
+  showEntryId,
+  selectDisabled,
+  selectDisabledIndeterminate,
+  disabledEntrySet,
+  removeSelectionEntrySet,
+}) => {
+  return (
+    <Table.Body>
+      {entries.map(entry => (
+        <Row
+          key={entry.id}
+          perspectiveId={perspectiveId}
+          entry={entry}
+          columns={columns}
+          mode={mode}
+          entitiesMode={entitiesMode}
+          actions={actions}
+          selectEntries={selectEntries}
+          selectedEntries={selectedEntries}
+          onEntrySelect={onEntrySelect}
+          showEntryId={showEntryId}
+          selectDisabled={selectDisabled}
+          selectDisabledIndeterminate={selectDisabledIndeterminate}
+          disabledEntrySet={disabledEntrySet}
+          removeSelectionEntrySet={removeSelectionEntrySet}
+        />
+      ))}
+    </Table.Body>
+  );
+}
 
 TableBody.propTypes = {
   perspectiveId: PropTypes.array.isRequired,

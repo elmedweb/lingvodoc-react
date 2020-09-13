@@ -564,7 +564,7 @@ class AdditionalFilter extends PureComponent {
           >
             <Modal.Header>{showLanguagesTreeText}</Modal.Header>
             <Modal.Content scrolling>
-              <Languages
+              {/* <Languages
                 onChange={this.onLangsDictsChange}
                 languagesTree={languagesTree}
                 langsChecked={languages}
@@ -573,7 +573,7 @@ class AdditionalFilter extends PureComponent {
                 filterMode
                 checkAllButtonText={checkAllButtonText}
                 uncheckAllButtonText={uncheckAllButtonText}
-              />
+              /> */}
             </Modal.Content>
             <Modal.Actions>
               <Button primary basic onClick={this.onShowLangsButtonClick}>

@@ -1,20 +1,25 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import gql from 'graphql-tag';
 import PropTypes from 'prop-types';
 import { graphql } from 'react-apollo';
 import { compose } from 'recompose';
 import { Header, Breadcrumb, Dropdown } from 'semantic-ui-react';
 import { openRoles } from 'ducks/roles';
+import { openModal as openDictionaryOrganizationsModal } from 'ducks/dictionaryOrganizations';
+import { openDictionaryPropertiesModal } from 'ducks/dictionaryProperties';
 import { openPerspectivePropertiesModal } from 'ducks/perspectiveProperties';
+import { openSaveDictionaryModal } from 'ducks/saveDictionary';
 import { openStatistics } from 'ducks/statistics';
 import { getTranslation } from 'api/i18n';
-import { Link } from 'react-router-dom';
+
 
 const queryPerspectivePath = gql`
   query queryPerspectivePath($id: LingvodocID!) {
     perspective(id: $id) {
+      id
       tree {
         id
         translation
@@ -26,6 +31,7 @@ const queryPerspectivePath = gql`
 const queryAvailablePerspectives = gql`
   query availablePerspectives($dictionary_id: LingvodocID!) {
     dictionary(id: $dictionary_id) {
+      id
       perspectives {
         id
         parent_id
@@ -101,7 +107,7 @@ class PerspectivePath extends React.Component {
   }
 
   render() {
-    const { id, dictionary_id, queryPerspectivePath, queryAvailablePerspectives, mode, className, actions } = this.props;
+    const { id, dictionary_id, queryPerspectivePath, queryAvailablePerspectives, mode, className, actions, user } = this.props;
 
     if (queryPerspectivePath.loading || queryPerspectivePath.error || queryAvailablePerspectives.loading || queryAvailablePerspectives.error) {
       return null;
@@ -139,20 +145,24 @@ PerspectivePath.defaultProps = {
 
 export default compose(
   connect(
-    null,
+    state => state.user,
     dispatch => ({
-      actions: bindActionCreators({ openRoles, openPerspectivePropertiesModal, openStatistics }, dispatch),
+      actions: bindActionCreators(
+        {openDictionaryOrganizationsModal,
+          openDictionaryPropertiesModal,
+          openPerspectivePropertiesModal,
+          openRoles,
+          openSaveDictionaryModal,
+          openStatistics},
+        dispatch),
     })
   ),
   graphql(queryPerspectivePath, {
-      name: 'queryPerspectivePath',
-      options: (props) => ({ variables: { id: props.id } })
-    }
-  ),
+    name: 'queryPerspectivePath',
+    options: props => ({ variables: { id: props.id } })
+  }),
   graphql(queryAvailablePerspectives, {
-      name: 'queryAvailablePerspectives',
-      options: (props) => ({ variables: { dictionary_id: props.dictionary_id } })
-    }
-  )
-)
-(PerspectivePath);
+    name: 'queryAvailablePerspectives',
+    options: props => ({ variables: { dictionary_id: props.dictionary_id } })
+  })
+)(PerspectivePath);

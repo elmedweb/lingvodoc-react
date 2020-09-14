@@ -22,7 +22,7 @@ const OrWrapper = styled(Segment)`
     top: 0;
   }
 `;
-const Empty = () => <h3>{getTranslation('No background tasks')}</h3>;
+const Empty = () => <h3 style={{ marginTop: 0 }}>{getTranslation('No background tasks')}</h3>;
 
 const enhance = branch(({ tasks }) => tasks.length === 0, renderComponent(Empty));
 
@@ -51,9 +51,7 @@ function Task(props) {
     <List.Content>
       <OrWrapper>
         <Header size="small">{task_family}</Header>
-        {progress === 100 && (
-          <Button compact basic icon="delete" className="delete-task-button" onClick={() => remove(id)} />
-        )}
+        <Button compact basic icon="delete" className="delete-task-button" onClick={() => remove(id)} />
 
         {task_details}
         <Progress label={`(${current_stage}/${total_stages}) ${status}`} percent={progress} progress="percent" />

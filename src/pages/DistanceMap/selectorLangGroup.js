@@ -23,6 +23,8 @@ query dictionaryName($id:LingvodocID) {
   }
 }`;
 
+let arrDictionariesGroup = [];
+
 function selectorLangGroup({
   mainGroup,
   mainDictionary,
@@ -45,7 +47,6 @@ function selectorLangGroup({
   const dictionaryWithLexicalEntries = [];
   let rootLanguage = {};
   let mainDict = [];
-  let arrDictionariesGroup = [];
 
   client.query({
     query: dictionaryName,
@@ -64,8 +65,11 @@ function selectorLangGroup({
   });
 
 
-  const filterDictionary = (dict, checked) => {
-    if (checked) {
+  const filterDictionary = (dict) => {
+    selectedLanguage.push({ color: 'green' });
+    const isDictAdded = arrDictionariesGroup.some(element => id2str(element.id) === id2str(dict.id));
+
+    if (!isDictAdded) {
       arrDictionariesGroup.push(dict);
     } else {
       arrDictionariesGroup = arrDictionariesGroup.filter(element => id2str(element.id) !== id2str(dict.id));
@@ -184,6 +188,7 @@ function selectorLangGroup({
           <Segment >
             {twoChildLanguages.map(lang =>
               <Button
+                style={lang.color}
                 active={focusTwoChildLanguages === lang.translation}
                 key={lang.id.join('_')}
                 onClick={() => {
@@ -200,7 +205,8 @@ function selectorLangGroup({
             (dict.additional_metadata.location !== null) && (
               <Segment key={dict.id.join('_')}>
                 <Checkbox
-                  onChange={(event, { checked }) => { filterDictionary(dict, checked); }}
+                  onChange={(event, { checked }) => { filterDictionary(dict, checked, selectedLanguage); }}
+                  defaultChecked={arrDictionariesGroup.some(element => id2str(element.id) === id2str(dict.id))}
                   label={dict.translation}
                 />
               </Segment>

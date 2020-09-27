@@ -95,7 +95,9 @@ function selectorLangGroup(props) {
     allDictionaries.forEach((dict) => {
       if ((id2str(dict.parent_id) === id2str(lang.id)) && dict.perspectives[1] && dict.perspectives[0]) {
         if (checkLexicalEntries(dict.perspectives[0].translation) || checkLexicalEntries(dict.perspectives[1].translation)) {
-          arrDictionary.push(dict);
+          if (labelDict !== dict.translation) {
+            arrDictionary.push(dict);
+          }
         }
       }
     });

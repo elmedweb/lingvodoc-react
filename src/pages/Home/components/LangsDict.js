@@ -11,6 +11,8 @@ import { compose } from 'recompose';
 import Languages from 'components/Search/AdditionalFilter/Languages';
 import { Checkbox, List, Button, Modal, Card } from 'semantic-ui-react';
 import { getNodeValue, propsNames } from 'components/Search/AdditionalFilter/Languages/helpers';
+import TreeBtn from './treeBtn';
+import { compositeIdToString } from '../../../utils/compositeId';
 
 const metadataQuery = gql`
   query metadata {
@@ -61,6 +63,18 @@ class AllDicts extends React.Component {
       open: false
     };
     this.test3 = test666;
+
+    this.qwe = this.qwe.bind(this);
+  }
+
+  qwe(title) {
+    for (let ref of Object.values(this.refs)) {
+      if ( ref.props.title !== title ) {
+        ref.hide()
+      } else {
+        console.log( ref )
+      }
+    }
   }
 
 
@@ -80,24 +94,30 @@ class AllDicts extends React.Component {
       languagesTree
     );
     const localLangTree = languagesTree.toJS();
-    const test666 = localLangTree.filter((element) => {
-      if (element.children.length > 0) return true;
-    });
-    const createChildrenLanguages = (nodes) => {
+    // const test666 = localLangTree.filter((element) => {
+    //   if (element.children.length > 0) return true;
+    // });
+    // const createChildrenLanguages = (nodes) => {
 
-    };
-    console.log('test666', test666);
-    const test8 = (text) => {
-      console.log(text);
-      this.setState(oldState => ({ showRoot: !oldState.showRoot }));
-      this.setState({ childrenLang: text });
-    };
-    const test7 = (el) => {
-      this.setState({ childrenDict: el.children });
-      console.log(el);
-      this.setState(oldState => ({ showElem: !oldState.showElem }));
-    };
+    // };
 
+    // const test8 = (text) => {
+    //   this.setState(oldState => ({ showRoot: !oldState.showRoot }));
+    //   this.setState({ childrenLang: text });
+    // };
+    // const test7 = (el) => {
+    //   this.setState({ childrenDict: el.children });
+    //   this.setState(oldState => ({ showElem: !oldState.showElem }));
+    // };
+
+
+    const treeBtns = localLangTree.map(item => <TreeBtn
+      key={compositeIdToString(item.id)}
+      title={item.translation}
+      data={item.children}
+      func={this.qwe}
+      ref={compositeIdToString(item.id)}
+    />);
 
     return (
       <div>
@@ -109,32 +129,15 @@ class AllDicts extends React.Component {
         >
           <Modal.Header>Select a Photo</Modal.Header>
           <Modal.Content>
-            <List horizontal>
+            {treeBtns}
+            {/* <List horizontal>
               {this.state.langsState.map(text =>
                 <List.Item key={text.id.join('_')}>
-                  <Checkbox defaultChecked onClick={() => test8(text)} label={text.translation} />
+                  <Button onClick={() => test8(text)}>1</Button>
+                  <Checkbox defaultChecked  label={text.translation} />
                 </List.Item>)}
 
-            </List>
-
-            <List horizontal>
-              {(this.state.childrenLang.length !== 0) && (this.state.childrenLang.children.map(el =>
-                <List.Item key={el.id.join('_')}>
-                  <Card>
-                    <Checkbox defaultChecked onClick={() => test7(el)} label={el.translation} />
-                  </Card>
-
-
-                </List.Item>))}
-            </List>
-            <List.List>
-              {(this.state.childrenDict.length !== 0)
-                && (this.state.childrenDict.map(t =>
-                  <List.Item key={t.id.join('_')}>
-                    <Checkbox defaultChecked label={t.translation} />
-                  </List.Item>))
-              }
-            </List.List>
+            </List> */}
           </Modal.Content>
           <Modal.Actions>
             <Button color="black" onClick={() => this.setState({ open: false })}>
@@ -144,7 +147,10 @@ class AllDicts extends React.Component {
               content="Yep, that's me"
               labelPosition="right"
               icon="checkmark"
-              onClick={() => this.setState({ open: false })}
+              onClick={() => {
+                console.log(this.refs);
+                // return this.setState({ open: false })
+              }}
               positive
             />
           </Modal.Actions>

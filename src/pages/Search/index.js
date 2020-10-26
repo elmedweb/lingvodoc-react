@@ -300,7 +300,7 @@ class SearchTabs extends React.Component {
 
     const { actions } = props
 
-    actions.setDefaultDataForTree({})
+    actions.setDefaultDataForTree()
     actions.setDefaultGroup({})
     actions.setMainGroupLanguages({})
     actions.setCheckStateTreeFlat({})

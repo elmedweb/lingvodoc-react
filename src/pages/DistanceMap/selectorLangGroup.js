@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
-import { Segment, Button } from 'semantic-ui-react';
+import { Segment, Button, Dropdown } from 'semantic-ui-react';
 import { compose } from 'recompose';
 import { fromJS } from 'immutable';
 import { buildLanguageTree } from 'pages/Search/treeBuilder';
@@ -12,12 +12,12 @@ import { Link } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setDictionariesGroup, setDefaultGroup, setMainGroupLanguages, setCheckStateTreeFlat, setDataForTree } from 'ducks/distanceMap';
-import { dictionaryWithPerspectivesQuery,dictionaryName } from './graphql';
+import { dictionaryWithPerspectivesQuery, dictionaryName } from './graphql';
 import { compositeIdToString } from 'utils/compositeId';
 import Placeholder from 'components/Placeholder';
 import Languages from 'components/Search/AdditionalFilter/Languages';
 import checkCoordAndLexicalEntries from './checkCoordinatesAndLexicalEntries';
-
+import { flattenNodes } from 'components/Search/AdditionalFilter/Languages/helpers';
 
 
 class FilterDictionaries extends React.Component {
@@ -31,8 +31,11 @@ class FilterDictionaries extends React.Component {
       dataForTree,
       mainGroupDictionaresAndLanguages,
       mainDictionary,
-      selected
+      selected,
+      sett
     } = newProps;
+
+    this.sett = sett;
 
 
     const {
@@ -40,16 +43,25 @@ class FilterDictionaries extends React.Component {
       languageTree,
     } = dataForTree;
 
+    this.dictionariesForDropdown = checkCoordAndLexicalEntries(dataForTree.dictionaries).map(item => ({
+      key: compositeIdToString(item.id),
+      value: item.id.join(','),
+      text: item.translation
+    }));
+    const flatNodes = {};
+
+
     this.state = {
       filterMode: true,
       showSearchSelectLanguages: true,
+      flatNodes,
+      test: null
     };
-
 
     this.getUpdatedLanguagesTree = this.getUpdatedLanguagesTree.bind(this);
     this.fillWithLangsWithDicts = this.fillWithLangsWithDicts.bind(this);
     this.isLanguageWithDictsDeep = this.isLanguageWithDictsDeep.bind(this);
-
+    this.qwe = this.qwe.bind(this);
 
     const allDictionaries = dictionaries.filter(dict => compositeIdToString(dict.id) !== compositeIdToString(mainDictionary.id));
 
@@ -68,7 +80,18 @@ class FilterDictionaries extends React.Component {
 
     const rawLanguagesTree = buildLanguageTree(fromJS(fileredLanguageTree)).toJS();
     this.languagesTree = this.getUpdatedLanguagesTree(rawLanguagesTree);
+
+    flattenNodes(rawLanguagesTree, this.state.flatNodes);
+
+    Object.keys(this.state.flatNodes).forEach((value) => {
+      const flatNode = this.state.flatNodes[value];
+      flatNode.checked = true;
+      if (true) {
+        flatNode.checkState = 1;
+      }
+    });
   }
+
 
   getUpdatedLanguagesTree(rawLanguagesTree) {
     const newLanguagesTree = [];
@@ -113,6 +136,20 @@ class FilterDictionaries extends React.Component {
     }
   }
 
+  qwe(item) {
+    const newFlat = this.state.flatNodes;
+
+    newFlat[item.value].expanded = true;
+
+    this.setState({ flatNodes: newFlat });
+
+    if (!item.self.parent_id) {
+      return;
+    }
+
+    this.qwe(Object.values(this.state.flatNodes).find(value => value.value === item.self.parent_id.join(',')));
+  }
+
 
   render() {
     const { newProps } = this.props;
@@ -120,10 +157,25 @@ class FilterDictionaries extends React.Component {
     const {
       mainGroupDictionaresAndLanguages,
       onLangsDictsChange,
-      selectedLanguages
+      selectedLanguages,
+      checkStateTreeFlat,
+      actions
     } = newProps;
+
     return (
       <Segment >
+        <Dropdown
+          placeholder={getTranslation('Search dictionary')}
+          fluid
+          search
+          selection
+          options={this.dictionariesForDropdown}
+          onChange={(event, data) => {
+            this.qwe(Object.values(this.state.flatNodes).find(item => item.value === data.value));
+            actions.setCheckStateTreeFlat({ selectedLanguagesChecken: this.state.flatNodes });
+            this.setState({ test: data })
+          }}
+        />
         {(mainGroupDictionaresAndLanguages.languages) && (<Languages
           onChange={onLangsDictsChange}
           languagesTree={this.languagesTree}
@@ -179,6 +231,7 @@ function SelectorLangGroup(props) {
     let rootLanguage = {};
     const arrDictionariesGroup = [];
     const [mainGroupDictsAndLangs, setMainGroupDictsAndLangs] = useState(mainGroupDictionaresAndLanguages);
+    const [customState, setCustomState] = useState(null);
     const [mainDictionary, setMainDictionary] = useState(null);
     const parentId = mainPerspectives[0].parent_id;
 
@@ -236,7 +289,7 @@ function SelectorLangGroup(props) {
         arrDictionariesGroup.push(mainDictionary);
         actions.setDictionariesGroup({ arrDictionariesGroup });
         actions.setMainGroupLanguages({ dictsChecked: mainGroupDictsAndLangs.dictionaries || [], languages: mainGroupDictsAndLangs.languages || [] });
-        actions.setCheckStateTreeFlat({ selectedLanguagesChecken });
+        // actions.setCheckStateTreeFlat({ selectedLanguagesChecken });
       }
     }
 
@@ -251,16 +304,29 @@ function SelectorLangGroup(props) {
     }
 
 
+    const FilterTest = compose(
+      connect(
+        state => ({ ...state.distanceMap })
+        , dispatch => ({
+          actions: bindActionCreators({
+            setDictionariesGroup, setDefaultGroup, setMainGroupLanguages, setCheckStateTreeFlat, setDataForTree
+          }, dispatch)
+        })
+      ),
+      connect(state => state.locale),
+      withApollo,
+    )(FilterDictionaries);
+
     return (
       <div>
         {(mainDictionary) && (
           <div>
             <h1 style={{ margin: '15px 0' }}>{mainDictionary.translation}</h1>
-            <FilterDictionaries newProps={{
+            <FilterTest newProps={{
               ...props,
               onLangsDictsChange,
               mainDictionary,
-              selectedLanguages
+              selectedLanguages,
             }}
             />
           </div>

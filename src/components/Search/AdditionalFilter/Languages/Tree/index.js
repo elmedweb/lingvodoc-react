@@ -496,7 +496,6 @@ class Tree extends PureComponent {
   renderTreeNodes(nodes, parent = {}) {
 
     const { checkStateTreeFlat } = this.props
-
     let flatNode = null;
     const treeNodes = nodes.map((node) => {
       const nodeValue = getNodeValue(node);
@@ -560,7 +559,6 @@ class Tree extends PureComponent {
     if (selectedLanguages) {
       selectedLanguages(this.flatNodes)
     }
-
 
     return (
       <Segment.Group className={groupClassName}>

@@ -59,7 +59,7 @@ function dataForTree(state = {}, { type, payload }) {
         idLocale: payload.id
       };
     case SET_DEFAULT_DATA_FOR_TREE:
-      return state;
+      return {};
     default:
       return state;
   }
@@ -78,6 +78,5 @@ export default combineReducers({
   dictionariesGroupState,
   mainGroupDictionaresAndLanguages,
   checkStateTreeFlat,
-  setDefaultDataForTree
 });
 

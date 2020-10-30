@@ -223,7 +223,7 @@ class TreeNode extends PureComponent {
   }
 
   render() {
-    const { isLeaf, isParent } = this.props;
+    const { isLeaf, isParent,value } = this.props;
     const containerClassName = isLeaf ?
       `${classNames.node} ${classNames.leaf}` :
       `${classNames.node} ${classNames.group}`;
@@ -231,7 +231,7 @@ class TreeNode extends PureComponent {
     const children = isParent ? this.renderChildren() : null;
 
     return (
-      <div className={containerClassName}>
+      <div id={value} className={containerClassName}>
         {title}
         {children}
       </div>

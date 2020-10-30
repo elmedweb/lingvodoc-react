@@ -18,13 +18,39 @@ import Placeholder from 'components/Placeholder';
 import Languages from 'components/Search/AdditionalFilter/Languages';
 import checkCoordAndLexicalEntries from './checkCoordinatesAndLexicalEntries';
 import { flattenNodes } from 'components/Search/AdditionalFilter/Languages/helpers';
+import smoothScroll from 'utils/smoothscroll';
 
+
+const classNames = {
+  langHighlighted: 'highlighted',
+  scrollContainer: 'pusher',
+  mainHeader: 'menu',
+};
+
+
+const getLangElementId = id => `lang_${id.toString()}`;
+
+const getScrollContainer = () => document.querySelector('search-language-tree__items');
+
+const goToLanguage = (el) => {
+  /*   const el = document.getElementById(getLangElementId(id)); */
+  const container = document.getElementsByClassName('search-language-tree__wrap')[0];
+  const offsetTop = 160;
+  console.log(container)
+  smoothScroll(el.offsetTop - offsetTop, 500, null, container);
+
+  el.classList.add(classNames.langHighlighted);
+
+ /*  setTimeout(() => {
+    el.classList.remove(classNames.langHighlighted);
+  }, 5000); */
+};
 
 class FilterDictionaries extends React.Component {
   constructor(props) {
     super(props);
 
-    const { newProps } = this.props;
+    const { newProps } = props;
 
     const {
       actions,
@@ -36,7 +62,6 @@ class FilterDictionaries extends React.Component {
     } = newProps;
 
     this.sett = sett;
-
 
     const {
       dictionaries,
@@ -55,14 +80,22 @@ class FilterDictionaries extends React.Component {
       filterMode: true,
       showSearchSelectLanguages: true,
       flatNodes,
-      test: null
+      test: null,
+      elemDom: null
+      // itemForScroll: null
     };
-
+    // this.elemDom = null;
+    this.itemForScroll = null;
     this.getUpdatedLanguagesTree = this.getUpdatedLanguagesTree.bind(this);
     this.fillWithLangsWithDicts = this.fillWithLangsWithDicts.bind(this);
     this.isLanguageWithDictsDeep = this.isLanguageWithDictsDeep.bind(this);
+    this.onLangsDictsChange = this.onLangsDictsChange.bind(this);
     this.qwe = this.qwe.bind(this);
-
+    this.send = this.send.bind(this);
+    this.selectedLanguages = this.selectedLanguages.bind(this);
+    this.arrDictionariesGroup = [];
+    this.selectedLanguagesChecken = [];
+    this.test666 = this.test666.bind(this);
     const allDictionaries = dictionaries.filter(dict => compositeIdToString(dict.id) !== compositeIdToString(mainDictionary.id));
 
     const copyLanguageTree = JSON.parse(JSON.stringify(languageTree));
@@ -92,6 +125,22 @@ class FilterDictionaries extends React.Component {
     });
   }
 
+
+  onLangsDictsChange(data) {
+    const { newProps } = this.props;
+    this.arrDictionariesGroup = [];
+    const {
+      dataForTree
+    } = newProps;
+    this.setState({ test: data });
+    if (data.dictionaries) {
+      data.dictionaries.forEach(el => dataForTree.dictionaries.forEach((dict) => {
+        if (compositeIdToString(dict.id) === compositeIdToString(el)) {
+          this.arrDictionariesGroup.push(dict);
+        }
+      }));
+    }
+  }
 
   getUpdatedLanguagesTree(rawLanguagesTree) {
     const newLanguagesTree = [];
@@ -140,7 +189,6 @@ class FilterDictionaries extends React.Component {
     const newFlat = this.state.flatNodes;
 
     newFlat[item.value].expanded = true;
-
     this.setState({ flatNodes: newFlat });
 
     if (!item.self.parent_id) {
@@ -148,47 +196,141 @@ class FilterDictionaries extends React.Component {
     }
 
     this.qwe(Object.values(this.state.flatNodes).find(value => value.value === item.self.parent_id.join(',')));
+    if (item.type === 'dictionary') {
+      this.itemForScroll = item;
+      this.test666();
+
+    }
   }
 
+  /*   componentDidUpdate(q, w, e) {
+      console.log('werwerw', this.props, this.state, e);
+  
+    } */
+
+  test666() {
+    const elemDomLocal = document.getElementById(this.itemForScroll.value);
+
+
+    if (!elemDomLocal) {
+      window.setTimeout(this.test666, 1500);
+    }
+    if (elemDomLocal) {
+
+
+      goToLanguage(elemDomLocal)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      // this.setState({ elemDom: elemDomLocal });
+      // this.elemDom = elemDomLocal;
+      // this.setState({ elemDom: elemDomLocal })
+
+      // console.log(elemDomLocal.className);
+      // elemDomLocal.scrollIntoView({ behavior: 'smooth' });
+      // elemDomLocal.style.background = 'red';
+      //   this.setState({ elemDom: elemDomLocal })
+      /*       
+ */
+      //  window.setTimeout(elemDomLocal.style.background = 'transparent', 15000);
+
+    }
+  }
+  selectedLanguages(e) {
+    this.selectedLanguagesChecken = e;
+  }
+  send() {
+    const { newProps } = this.props;
+    const {
+      actions,
+      mainDictionary
+    } = newProps;
+    if (this.arrDictionariesGroup.length) {
+      this.arrDictionariesGroup.push(mainDictionary);
+      actions.setDictionariesGroup({ arrDictionariesGroup: this.arrDictionariesGroup });
+      actions.setMainGroupLanguages({ dictsChecked: this.state.test.dictionaries || [], languages: this.state.test.languages || [] });
+      actions.setCheckStateTreeFlat({ selectedLanguagesChecken: this.selectedLanguagesChecken });
+    }
+  }
 
   render() {
     const { newProps } = this.props;
 
     const {
       mainGroupDictionaresAndLanguages,
-      onLangsDictsChange,
-      selectedLanguages,
-      checkStateTreeFlat,
-      actions
+      actions,
+      history,
+      mainDictionary,
+      rootLanguage
     } = newProps;
 
     return (
-      <Segment >
-        <Dropdown
-          placeholder={getTranslation('Search dictionary')}
-          fluid
-          search
-          selection
-          options={this.dictionariesForDropdown}
-          onChange={(event, data) => {
-            this.qwe(Object.values(this.state.flatNodes).find(item => item.value === data.value));
-            actions.setCheckStateTreeFlat({ selectedLanguagesChecken: this.state.flatNodes });
-            this.setState({ test: data })
-          }}
-        />
-        {(mainGroupDictionaresAndLanguages.languages) && (<Languages
-          onChange={onLangsDictsChange}
-          languagesTree={this.languagesTree}
-          langsChecked={mainGroupDictionaresAndLanguages.languages}
-          dictsChecked={mainGroupDictionaresAndLanguages.dictsChecked}
-          selectedLanguages={selectedLanguages}
-          showTree={this.state.showSearchSelectLanguages}
-          filterMode={this.state.filterMode}
-          checkAllButtonText={getTranslation('Check all')}
-          uncheckAllButtonText={getTranslation('Uncheck all')}
-        />)}
+      <div className='languages-list'>
+        <Segment >
+          <Dropdown
+            placeholder={getTranslation('Search dictionary')}
+            fluid
+            search
+            selection
+            options={this.dictionariesForDropdown}
+            onChange={(event, data) => {
+              console.log(this.state)
+              this.qwe(Object.values(this.state.flatNodes).find(item => item.value === data.value));
+              actions.setCheckStateTreeFlat({ selectedLanguagesChecken: this.state.flatNodes });
+            }}
+          />
 
-      </Segment>
+          {(mainGroupDictionaresAndLanguages.languages) && (<Languages
+            onChange={(data) => {
+              this.onLangsDictsChange(data);
+            }}
+            languagesTree={this.languagesTree}
+            langsChecked={mainGroupDictionaresAndLanguages.languages}
+            dictsChecked={mainGroupDictionaresAndLanguages.dictsChecked}
+            selectedLanguages={this.selectedLanguages}
+            showTree={this.state.showSearchSelectLanguages}
+            filterMode={this.state.filterMode}
+            checkAllButtonText={getTranslation('Check all')}
+            uncheckAllButtonText={getTranslation('Uncheck all')}
+          />)}
+
+        </Segment>
+        <Button
+          style={{ margin: '15px 15px 0 0' }}
+          onClick={() => {
+            actions.setDefaultGroup();
+            history.goBack();
+          }}
+        > {getTranslation('Back')}
+        </Button>
+
+        <Link
+          to={{
+            pathname: '/distance_map/selected_languages/map',
+            state: {
+              mainDictionary,
+              rootLanguage
+            }
+          }}
+        >
+          <Button style={{ margin: '15px 0' }} onClick={() => this.send()}> {getTranslation('Next')} </Button>
+        </Link>
+      </div>
+
 
     );
   }
@@ -227,27 +369,21 @@ function SelectorLangGroup(props) {
     const {
       mainPerspectives,
     } = location.state;
-    let selectedLanguagesChecken = [];
+    const selectedLanguagesChecken = [];
     let rootLanguage = {};
-    const arrDictionariesGroup = [];
-    const [mainGroupDictsAndLangs, setMainGroupDictsAndLangs] = useState(mainGroupDictionaresAndLanguages);
-    const [customState, setCustomState] = useState(null);
+
     const [mainDictionary, setMainDictionary] = useState(null);
+    let mainGroupDictsAndLangs = null;
     const parentId = mainPerspectives[0].parent_id;
 
+
+    const writeDownGroupDictsAndLangs = (data) => {
+      mainGroupDictsAndLangs = data;
+    };
     client.query({
       query: dictionaryName,
       variables: { id: parentId },
     }).then(result => setMainDictionary(result.data.dictionary));
-
-
-    if (mainGroupDictsAndLangs.dictionaries) {
-      mainGroupDictsAndLangs.dictionaries.forEach(el => dataForTree.dictionaries.forEach((dict) => {
-        if (compositeIdToString(dict.id) === compositeIdToString(el)) {
-          arrDictionariesGroup.push(dict);
-        }
-      }));
-    }
 
 
     if (mainDictionary) {
@@ -284,25 +420,6 @@ function SelectorLangGroup(props) {
       return <Placeholder />;
     }
 
-    function send() {
-      if (arrDictionariesGroup.length) {
-        arrDictionariesGroup.push(mainDictionary);
-        actions.setDictionariesGroup({ arrDictionariesGroup });
-        actions.setMainGroupLanguages({ dictsChecked: mainGroupDictsAndLangs.dictionaries || [], languages: mainGroupDictsAndLangs.languages || [] });
-        // actions.setCheckStateTreeFlat({ selectedLanguagesChecken });
-      }
-    }
-
-
-    function selectedLanguages(e) {
-      selectedLanguagesChecken = e;
-    }
-
-
-    function onLangsDictsChange(list) {
-      setMainGroupDictsAndLangs(list);
-    }
-
 
     const FilterTest = compose(
       connect(
@@ -324,34 +441,16 @@ function SelectorLangGroup(props) {
             <h1 style={{ margin: '15px 0' }}>{mainDictionary.translation}</h1>
             <FilterTest newProps={{
               ...props,
-              onLangsDictsChange,
               mainDictionary,
-              selectedLanguages,
+
+              writeDownGroupDictsAndLangs,
+              rootLanguage
             }}
             />
           </div>
 
         )}
-        <Button
-          style={{ margin: '15px 15px 0 0' }}
-          onClick={() => {
-            actions.setDefaultGroup();
-            history.goBack();
-          }}
-        > {getTranslation('Back')}
-        </Button>
 
-        <Link
-          to={{
-            pathname: '/distance_map/selected_languages/map',
-            state: {
-              mainDictionary,
-              rootLanguage
-            }
-          }}
-        >
-          <Button style={{ margin: '15px 0' }} onClick={() => send()}> {getTranslation('Next')} </Button>
-        </Link>
       </div>
 
     );

@@ -57,6 +57,7 @@ class Languages extends PureComponent {
     this.onFilterLangsChange = this.onFilterLangsChange.bind(this);
   }
 
+
   /**
    * Event handler for changing selected languages or dictionaries.
    * @param {Array} checkedList - ["all"] if all languages and dictionaries selected or list of ids
@@ -106,7 +107,7 @@ class Languages extends PureComponent {
   }
 
   render() {
-    const { languagesTree, langsChecked, dictsChecked, showTree,selectedLanguages } = this.props;
+    const { languagesTree, langsChecked, dictsChecked, showTree, selectedLanguages } = this.props;
     // TODO: translations
     const { checkAllButtonText, uncheckAllButtonText } = this.props;
     const checkedData = this.getDataInInternalFormat(langsChecked, dictsChecked);

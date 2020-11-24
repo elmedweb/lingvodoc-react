@@ -106,9 +106,10 @@ class FilterDictionaries extends React.Component {
     });
 
     if ((mainGroupDictionaresAndLanguages && !mainGroupDictionaresAndLanguages.dictsChecked) || (selected.id !== dataForTree.idLocale)) {
+
       this.languages = fileredLanguageTree.map(el => el.id);
       this.dictsChecked = allDictionaries.map(el => el.id);
-      actions.setMainGroupLanguages({ dictsChecked: this.dictsChecked, languages: this.languages });
+      actions.setMainGroupLanguages({ dictsChecked: [], languages: [] });
     }
 
     const rawLanguagesTree = buildLanguageTree(fromJS(fileredLanguageTree)).toJS();

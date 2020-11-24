@@ -36,12 +36,12 @@ const goToLanguage = (el) => {
   /*   const el = document.getElementById(getLangElementId(id)); */
   const container = document.getElementsByClassName('search-language-tree__wrap')[0];
   const offsetTop = 160;
-  console.log(container)
-  smoothScroll(el.offsetTop - offsetTop, 500, null, container);
+  console.log(container);
+  /* smoothScroll(el.offsetTop - offsetTop, 500, null, container); */
 
   el.classList.add(classNames.langHighlighted);
 
- /*  setTimeout(() => {
+  /*  setTimeout(() => {
     el.classList.remove(classNames.langHighlighted);
   }, 5000); */
 };
@@ -106,7 +106,6 @@ class FilterDictionaries extends React.Component {
     });
 
     if ((mainGroupDictionaresAndLanguages && !mainGroupDictionaresAndLanguages.dictsChecked) || (selected.id !== dataForTree.idLocale)) {
-
       this.languages = fileredLanguageTree.map(el => el.id);
       this.dictsChecked = allDictionaries.map(el => el.id);
       actions.setMainGroupLanguages({ dictsChecked: [], languages: [] });
@@ -189,6 +188,12 @@ class FilterDictionaries extends React.Component {
   qwe(item) {
     const newFlat = this.state.flatNodes;
 
+    console.log(newFlat[item.value].expanded);
+
+    //  console.log(newFlat[item.value].expanded === true)
+    if (newFlat[item.value].expanded == true) {
+      console.log('swdfasf');
+    }
     newFlat[item.value].expanded = true;
     this.setState({ flatNodes: newFlat });
 
@@ -200,13 +205,12 @@ class FilterDictionaries extends React.Component {
     if (item.type === 'dictionary') {
       this.itemForScroll = item;
       this.test666();
-
     }
   }
 
   /*   componentDidUpdate(q, w, e) {
       console.log('werwerw', this.props, this.state, e);
-  
+
     } */
 
   test666() {
@@ -217,38 +221,17 @@ class FilterDictionaries extends React.Component {
       window.setTimeout(this.test666, 1500);
     }
     if (elemDomLocal) {
-
-
-      goToLanguage(elemDomLocal)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      // this.setState({ elemDom: elemDomLocal });
-      // this.elemDom = elemDomLocal;
+      /* goToLanguage(elemDomLocal) */
+      this.elemDom = elemDomLocal;
       // this.setState({ elemDom: elemDomLocal })
 
-      // console.log(elemDomLocal.className);
-      // elemDomLocal.scrollIntoView({ behavior: 'smooth' });
-      // elemDomLocal.style.background = 'red';
-      //   this.setState({ elemDom: elemDomLocal })
-      /*       
+      console.log(elemDomLocal.className);
+      elemDomLocal.scrollIntoView({ behavior: 'smooth' });
+      elemDomLocal.style.background = 'red';
+      this.setState({ elemDom: elemDomLocal });
+      /*
  */
       //  window.setTimeout(elemDomLocal.style.background = 'transparent', 15000);
-
     }
   }
   selectedLanguages(e) {
@@ -280,7 +263,7 @@ class FilterDictionaries extends React.Component {
     } = newProps;
 
     return (
-      <div className='languages-list'>
+      <div className="languages-list">
         <Segment >
           <Dropdown
             placeholder={getTranslation('Search dictionary')}
@@ -289,9 +272,14 @@ class FilterDictionaries extends React.Component {
             selection
             options={this.dictionariesForDropdown}
             onChange={(event, data) => {
-              console.log(this.state)
+                  const test78 = this.state.flatNodes;   
+              console.log(test78);
+       
+              test78.forEach((flat) => {
+                flat.expanded = false;
+              });
               this.qwe(Object.values(this.state.flatNodes).find(item => item.value === data.value));
-              actions.setCheckStateTreeFlat({ selectedLanguagesChecken: this.state.flatNodes });
+              actions.setCheckStateTreeFlat({ selectedLanguagesChecken: test78 });
             }}
           />
 
